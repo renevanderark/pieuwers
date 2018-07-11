@@ -1,5 +1,6 @@
 export enum ActionTypes {
   KEYDOWN,
   KEYUP,
-  UPDATE
+  UPDATE,
+  SPAWN_BULLET
 }

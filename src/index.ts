@@ -17,18 +17,28 @@ const {  onKeyUp, onKeyDown } = keyActionCreator(store.dispatch);
 
 const pieuwerLayer = document.getElementById("pieuwer-layer");
 const pieuwerTwoLayer = document.getElementById("pieuwer2-layer");
+const bulletLayer = document.getElementById("bullet-layer");
 if (!(pieuwerLayer instanceof HTMLCanvasElement)) { throw new TypeError("wrong element type"); }
 if (!(pieuwerTwoLayer instanceof HTMLCanvasElement)) { throw new TypeError("wrong element type"); }
+if (!(bulletLayer instanceof HTMLCanvasElement)) { throw new TypeError("wrong element type"); }
+
 const pieuwerLayerCtx = pieuwerLayer.getContext("2d");
 const pieuwerTwoLayerCtx = pieuwerTwoLayer.getContext("2d");
+const bulletLayerCtx = bulletLayer.getContext("2d");
 
 
 const pieuwerOneFrameRenderer = getFrameRenderer(pieuwerLayerCtx, pieuwerLayer);
 const pieuwerTwoFrameRenderer = getFrameRenderer(pieuwerTwoLayerCtx, pieuwerTwoLayer);
+const bulletFrameRenderer = getFrameRenderer(bulletLayerCtx, bulletLayer);
 
 const eventListeners = getEventListeners();
 
-initViewPort(VIRT_WIDTH, VIRT_HEIGHT, getResizeListeners([pieuwerLayer, pieuwerTwoLayer], eventListeners.onResize, pieuwerOneFrameRenderer.onResize, pieuwerTwoFrameRenderer.onResize));
+initViewPort(VIRT_WIDTH, VIRT_HEIGHT, getResizeListeners([pieuwerLayer, pieuwerTwoLayer, bulletLayer],
+  eventListeners.onResize,
+  pieuwerOneFrameRenderer.onResize,
+  pieuwerTwoFrameRenderer.onResize,
+  bulletFrameRenderer.onResize
+));
 
 eventListeners.add("keydown", (ev : KeyboardEvent) => { onKeyDown(ev.key); return ev.preventDefault(); });
 eventListeners.add("keyup", (ev : KeyboardEvent) => { onKeyUp(ev.key); return ev.preventDefault(); });
@@ -91,15 +101,28 @@ class Pieuwer implements Drawable {
 
 const pieuwerOne = new Pieuwer(store.getState().pieuwerStates.pieuwerOne);
 const pieuwerTwo = new Pieuwer(store.getState().pieuwerStates.pieuwerTwo);
-
+pieuwerOneFrameRenderer.render([pieuwerOne]);
+pieuwerTwoFrameRenderer.render([pieuwerTwo]);
 
 const renderLoop = () => {
-  pieuwerOne.updateState(store.getState().pieuwerStates.pieuwerOne);
-  pieuwerTwo.updateState(store.getState().pieuwerStates.pieuwerTwo);
-  debug.innerHTML = JSON.stringify(store.getState(), null, 2);
+  const { pieuwerStates, bulletStates } : GameState = store.getState();
+
+  pieuwerOne.updateState(pieuwerStates.pieuwerOne);
+  pieuwerTwo.updateState(pieuwerStates.pieuwerTwo);
+//  debug.innerHTML = JSON.stringify(store.getState(), null, 2);
+
+  bulletFrameRenderer.clear();
 
   pieuwerOneFrameRenderer.render([pieuwerOne]);
   pieuwerTwoFrameRenderer.render([pieuwerTwo]);
+  bulletFrameRenderer.render(bulletStates.bullets.map((bs) => ({
+    updated: () => true,
+    clear: () => {},
+    draw: (ctx: CanvasRenderingContext2D, scale: number) => {
+      ctx.fillStyle = "white";
+      ctx.fillRect(bs.xPos * scale, bs.yPos * scale, 5 * scale, 5 * scale);
+    }
+  })));
 	requestAnimationFrame(renderLoop);
 };
 
@@ -108,4 +131,26 @@ const updateLoop = () => {
 }
 
 window.setInterval(updateLoop, 10);
+window.setInterval(() => {
+  const { pieuwerOne, pieuwerTwo } = store.getState().pieuwerStates;
+  if (pieuwerOne.shooting) {
+    const trajectory = (pieuwerOne.angle - 90) * (Math.PI / 180);
+    store.dispatch({
+      type: ActionTypes.SPAWN_BULLET,
+      xPos: pieuwerOne.xPos + Math.cos(trajectory) * 50,
+      yPos: pieuwerOne.yPos + Math.sin(trajectory) * 50,
+      trajectory: trajectory
+    });
+  }
+  if (pieuwerTwo.shooting) {
+    const trajectory = (pieuwerTwo.angle - 90) * (Math.PI / 180);
+    store.dispatch({
+      type: ActionTypes.SPAWN_BULLET,
+      xPos: pieuwerTwo.xPos + Math.cos(trajectory) * 50,
+      yPos: pieuwerTwo.yPos + Math.sin(trajectory) * 50,
+      trajectory: trajectory
+    });
+  }
+}, 50);
+
 renderLoop();

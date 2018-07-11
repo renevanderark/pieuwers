@@ -36,6 +36,13 @@ export interface KeyAction  {
   player: PieuwerKey
 }
 
+export interface BulletAction {
+  type: ActionTypes
+  xPos: number
+  yPos: number
+  trajectory: number
+}
+
 export const keyActionCreator = (dispatch : Dispatch<KeyAction>) => ({
   onKeyDown: (key : string) => dispatch({type: ActionTypes.KEYDOWN, key: KeyboardToPieuwerControlMap[key], player: KeyboardToPlayerControlMap[key]}),
   onKeyUp: (key : string) =>  dispatch({type: ActionTypes.KEYUP, key: KeyboardToPieuwerControlMap[key], player: KeyboardToPlayerControlMap[key]}),
