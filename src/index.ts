@@ -10,9 +10,10 @@ import getEventListeners from './resizable-canvas/event-listeners';
 import { VIRT_HEIGHT, VIRT_WIDTH } from './store/constants';
 import { PieuwerState } from './store/pieuwer-reducer';
 import { Drawable } from './resizable-canvas/drawable';
+import { initPadEvents } from "padevents";
 
 const store = createStore(combineReducers(reducers));
-const {  onKeyUp, onKeyDown } = keyActionCreator(store.dispatch);
+const {  onKeyUp, onKeyDown, onGamePadButtonUp, onGamePadButtonDown } = keyActionCreator(store.dispatch);
 
 
 const pieuwerLayer = document.getElementById("pieuwer-layer");
@@ -33,6 +34,20 @@ const bulletFrameRenderer = getFrameRenderer(bulletLayerCtx, bulletLayer);
 
 const eventListeners = getEventListeners();
 
+let gamePadToPlayerMap : {[key : string] : "pieuwerOne"|"pieuwerTwo"} = {};
+
+initPadEvents({
+  onUnmappedButton : () => { },
+  onControllersChange: (controllerIds : Array<string>) => {
+    if (controllerIds.length > 0 && typeof gamePadToPlayerMap[controllerIds[0]] === 'undefined') {
+      gamePadToPlayerMap[controllerIds[0]] = "pieuwerOne";
+    }
+    if (controllerIds.length > 1 && typeof gamePadToPlayerMap[controllerIds[1]] === 'undefined') {
+      gamePadToPlayerMap[controllerIds[1]] = "pieuwerTwo";
+    }
+  }
+});
+
 initViewPort(VIRT_WIDTH, VIRT_HEIGHT, getResizeListeners([pieuwerLayer, pieuwerTwoLayer, bulletLayer],
   eventListeners.onResize,
   pieuwerOneFrameRenderer.onResize,
@@ -42,6 +57,16 @@ initViewPort(VIRT_WIDTH, VIRT_HEIGHT, getResizeListeners([pieuwerLayer, pieuwerT
 
 eventListeners.add("keydown", (ev : KeyboardEvent) => { onKeyDown(ev.key); return ev.preventDefault(); });
 eventListeners.add("keyup", (ev : KeyboardEvent) => { onKeyUp(ev.key); return ev.preventDefault(); });
+
+['a', 'b', 'x', 'y'].forEach(k => {
+  eventListeners.add(`gamepad-${k}-pressed`, (ev : CustomEvent) => onGamePadButtonDown("a", gamePadToPlayerMap[ev.detail.controllerIndex]));
+  eventListeners.add(`gamepad-${k}-released`, (ev : CustomEvent) => onGamePadButtonUp("a", gamePadToPlayerMap[ev.detail.controllerIndex]));
+});
+
+['up', 'left', 'right', 'down'].forEach(k => {
+  eventListeners.add(`gamepad-${k}-pressed`, (ev : CustomEvent) => onGamePadButtonDown(k, gamePadToPlayerMap[ev.detail.controllerIndex]));
+  eventListeners.add(`gamepad-${k}-released`, (ev : CustomEvent) => onGamePadButtonUp(k, gamePadToPlayerMap[ev.detail.controllerIndex]));
+});
 
 const debug = document.getElementById("debug");
 

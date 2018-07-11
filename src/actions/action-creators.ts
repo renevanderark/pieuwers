@@ -14,7 +14,7 @@ const KeyboardToPlayerControlMap : {[key: string]: PieuwerKey } = {
   s: "pieuwerTwo",
   a: "pieuwerTwo",
   d: "pieuwerTwo",
-  " ": "pieuwerTwo"
+  c: "pieuwerTwo"
 };
 
 const KeyboardToPieuwerControlMap : {[key: string]: PieuwerControl} = {
@@ -27,7 +27,15 @@ const KeyboardToPieuwerControlMap : {[key: string]: PieuwerControl} = {
   s: PieuwerControl.DOWN,
   a: PieuwerControl.LEFT,
   d: PieuwerControl.RIGHT,
-  " ": PieuwerControl.SHOOT
+  c: PieuwerControl.SHOOT
+};
+
+const GamepadToPieuwerControlMap : {[key: string]: PieuwerControl} = {
+  a: PieuwerControl.SHOOT,
+  up: PieuwerControl.UP,
+  down: PieuwerControl.DOWN,
+  left: PieuwerControl.LEFT,
+  right: PieuwerControl.RIGHT,
 };
 
 export interface KeyAction  {
@@ -43,7 +51,11 @@ export interface BulletAction {
   trajectory: number
 }
 
+
+
 export const keyActionCreator = (dispatch : Dispatch<KeyAction>) => ({
   onKeyDown: (key : string) => dispatch({type: ActionTypes.KEYDOWN, key: KeyboardToPieuwerControlMap[key], player: KeyboardToPlayerControlMap[key]}),
-  onKeyUp: (key : string) =>  dispatch({type: ActionTypes.KEYUP, key: KeyboardToPieuwerControlMap[key], player: KeyboardToPlayerControlMap[key]}),
+  onKeyUp: (key : string) => dispatch({type: ActionTypes.KEYUP, key: KeyboardToPieuwerControlMap[key], player: KeyboardToPlayerControlMap[key]}),
+  onGamePadButtonDown: (key : string, player : PieuwerKey) => dispatch({type: ActionTypes.KEYDOWN, key: GamepadToPieuwerControlMap[key], player: player}),
+  onGamePadButtonUp: (key : string, player : PieuwerKey) => dispatch({type: ActionTypes.KEYUP, key: GamepadToPieuwerControlMap[key], player: player}),
 });
