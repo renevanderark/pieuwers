@@ -1,17 +1,23 @@
-import { ActionTypes, KeyAction  } from "../actions/action-types";
+import { ActionTypes  } from "../actions/action-types";
 import { AnyAction } from "redux";
 import { VIRT_WIDTH, VIRT_HEIGHT } from "./constants";
+import { KeyAction } from "../actions/action-creators";
 
 const yAcceleration = 0.1;
 const maxYSpeed = 3;
 const minYSpeed = -1.5;
 
-const turnAcceleration = 0.1;
-const maxAngle = 3;
-const minAngle = -3;
+const turnAcceleration = 1;
+const maxAngle = 30;
+const minAngle = -30;
 
 type stateKey = "accelerateUp"|"accelerateDown"|"accelerateLeft"|"accelerateRight"|"shooting";
-type pieuwerKey = "pieuwerOne"|"pieuwerTwo";
+export type PieuwerKey = "pieuwerOne"|"pieuwerTwo";
+
+export enum PieuwerControl {
+  UP, DOWN, LEFT, RIGHT, SHOOT
+}
+
 
 export interface PieuwerState {
   accelerateUp: boolean,
@@ -34,7 +40,7 @@ const initializePieuwerState = (xPos : number) : PieuwerState => ({
   accelerateLeft: false, accelerateRight: false,
   accelerateUp: false, accelerateDown: false,
   angle: 0, ySpeed: 0, shooting: false,
-  yPos: 150, xPos: xPos
+  yPos: VIRT_HEIGHT - 150, xPos: xPos
 });
 
 const initialState : MultiPieuwerState  = {
@@ -67,11 +73,11 @@ const updatePieuwerState = (pieuwerState : PieuwerState) : PieuwerState => ({
       ? guardNumber(pieuwerState.angle - turnAcceleration, maxAngle, 0)
       : 0,
 
-    yPos: guardNumber(Math.round(pieuwerState.yPos + pieuwerState.ySpeed), VIRT_HEIGHT, 0),
-    xPos: guardNumber(Math.round(pieuwerState.xPos + pieuwerState.angle), VIRT_WIDTH, 0)
+    yPos: guardNumber(Math.round(pieuwerState.yPos - pieuwerState.ySpeed), VIRT_HEIGHT, 0),
+    xPos: guardNumber(Math.round(pieuwerState.xPos + pieuwerState.angle * 0.1), VIRT_WIDTH, 0)
 });
 
-const setPieuwerState = (pieuwerState : MultiPieuwerState, pieuwer : pieuwerKey, key : stateKey, val : boolean) : MultiPieuwerState => ({
+const setPieuwerState = (pieuwerState : MultiPieuwerState, pieuwer : PieuwerKey, key : stateKey, val : boolean) : MultiPieuwerState => ({
     ...pieuwerState,
     [pieuwer] : {
       ...pieuwerState[pieuwer],
@@ -79,59 +85,39 @@ const setPieuwerState = (pieuwerState : MultiPieuwerState, pieuwer : pieuwerKey,
     }
 });
 
-export default function(state : MultiPieuwerState , action : KeyAction|AnyAction) {
+export default function(state : MultiPieuwerState, action : KeyAction) {
   if (typeof state === 'undefined') {
     return initialState;
   }
   switch (action.type) {
     case ActionTypes.KEYUP:
       switch (action.key) {
-        case 'ArrowUp':
-          return setPieuwerState(state, "pieuwerOne", "accelerateUp", false);
-        case 'ArrowDown':
-          return setPieuwerState(state, "pieuwerOne", "accelerateDown", false);
-        case 'w':
-          return setPieuwerState(state, "pieuwerTwo", "accelerateUp", false);
-        case 's':
-          return setPieuwerState(state, "pieuwerTwo", "accelerateDown", false);
-        case 'ArrowLeft':
-          return setPieuwerState(state, "pieuwerOne", "accelerateLeft", false);
-        case 'ArrowRight':
-          return setPieuwerState(state, "pieuwerOne", "accelerateRight", false);
-        case 'a':
-          return setPieuwerState(state, "pieuwerTwo", "accelerateLeft", false);
-        case 'd':
-          return setPieuwerState(state, "pieuwerTwo", "accelerateRight", false);
-        case '0':
-          return setPieuwerState(state, "pieuwerOne", "shooting", false);
-        case ' ':
-          return setPieuwerState(state, "pieuwerTwo", "shooting", false);
+        case PieuwerControl.UP:
+          return setPieuwerState(state, action.player, "accelerateUp", false);
+        case PieuwerControl.DOWN:
+          return setPieuwerState(state, action.player, "accelerateDown", false);
+        case PieuwerControl.LEFT:
+          return setPieuwerState(state, action.player, "accelerateLeft", false);
+        case PieuwerControl.RIGHT:
+          return setPieuwerState(state, action.player, "accelerateRight", false);
+        case PieuwerControl.SHOOT:
+          return setPieuwerState(state, action.player, "shooting", false);
         default:
           return state;
       }
 
     case ActionTypes.KEYDOWN:
       switch (action.key) {
-        case 'ArrowUp':
-          return setPieuwerState(state, "pieuwerOne", "accelerateUp", true);
-        case 'w':
-          return setPieuwerState(state, "pieuwerTwo", "accelerateUp", true);
-        case 'ArrowDown':
-          return setPieuwerState(state, "pieuwerOne", "accelerateDown", true);
-        case 's':
-          return setPieuwerState(state, "pieuwerTwo", "accelerateDown", true);
-        case 'ArrowLeft':
-          return setPieuwerState(state, "pieuwerOne", "accelerateLeft", true);
-        case 'a':
-          return setPieuwerState(state, "pieuwerTwo", "accelerateLeft", true);
-        case 'ArrowRight':
-          return setPieuwerState(state, "pieuwerOne", "accelerateRight", true);
-        case 'd':
-          return setPieuwerState(state, "pieuwerTwo", "accelerateRight", true);
-        case '0':
-          return setPieuwerState(state, "pieuwerOne", "shooting", true);
-        case ' ':
-          return setPieuwerState(state, "pieuwerTwo", "shooting", true);
+        case PieuwerControl.UP:
+          return setPieuwerState(state, action.player, "accelerateUp", true);
+        case PieuwerControl.DOWN:
+          return setPieuwerState(state, action.player, "accelerateDown", true);
+        case PieuwerControl.LEFT:
+          return setPieuwerState(state, action.player, "accelerateLeft", true);
+        case PieuwerControl.RIGHT:
+          return setPieuwerState(state, action.player, "accelerateRight", true);
+        case PieuwerControl.SHOOT:
+          return setPieuwerState(state, action.player, "shooting", true);
         default:
           return state;
       }
