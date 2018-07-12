@@ -197,7 +197,8 @@ const game = () => {
     const { bulletStates : { bullets }, enemyStates : { collisionGrid, enemies } } : GameState = store.getState();
     let collisions = bullets
       .map((bullet, bulletIdx) => ({
-        enemies: collisionGrid[bulletToCollisionKey(bullet)].filter((enemyIdx) => enemyCollidesWithBullet(bullet, enemies[enemyIdx])),
+        enemies: (collisionGrid[bulletToCollisionKey(bullet)]||[])
+          .filter((enemyIdx) => enemyCollidesWithBullet(bullet, enemies[enemyIdx])),
         bulletIdx: bulletIdx
       }))
       .filter(({enemies, bulletIdx}) => bullets[bulletIdx].explosion < 0)
