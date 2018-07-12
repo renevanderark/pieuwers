@@ -43,7 +43,7 @@ export default function(state : MultiBulletState, action : BulletAction) {
     return {
       bullets: state.bullets.map((bullet, idx) => ({
         ...bullet,
-        explosion: idx === action.bulletIdx ? 5 : bullet.explosion,
+        explosion: idx === action.bulletIdx ? 8 : bullet.explosion,
       }))
     };
     case ActionTypes.SPAWN_BULLET:

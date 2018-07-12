@@ -64,7 +64,7 @@ const makeEnemy = (xPos : number, yPos : number, health? : number, collisionRadi
   accelerateUp: false, accelerateDown: false,
   angle: 0, ySpeed: 0, shooting: false,
   collisionRadius: collisionRadius || 20,
-  health: health || 1, maxHealth: health || 1,
+  health: health || 4, maxHealth: health || 4,
   yPos: yPos, xPos: xPos
 });
 
@@ -81,11 +81,11 @@ export const enemyActionCreator = (dispatch : Dispatch<EnemyAction|BulletAction>
 export const bulletActionCreator = (dispatch : Dispatch<BulletAction>) => ({
   spawnBullet: (pieuwer : PieuwerState) =>  {
     if (pieuwer.shooting) {
-      const trajectory = (pieuwer.angle - 90) * (Math.PI / 180)
+      const trajectory = (pieuwer.angle - 90) * (Math.PI / 180);
       dispatch({
         type: ActionTypes.SPAWN_BULLET,
-        xPos: pieuwer.xPos + Math.cos(trajectory) * 50,
-        yPos: pieuwer.yPos + Math.sin(trajectory) * 50,
+        xPos: pieuwer.xPos + Math.cos(trajectory) * 120,
+        yPos: pieuwer.yPos + Math.sin(trajectory) * 120,
         trajectory: trajectory
       });
     }
