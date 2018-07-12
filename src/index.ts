@@ -161,21 +161,14 @@ const game = () => {
       clear: () => {},
       draw: (ctx: CanvasRenderingContext2D, scale: number) => {
         ctx.beginPath();
-        //ctx.fillStyle = `rgba(255,0,255,${enemy.health / enemy.maxHealth})`;
         ctx.globalAlpha = (enemy.health / enemy.maxHealth) * 0.5 + 0.5;
         ctx.drawImage(enemyPng,0,0, 100, 160,
           (enemy.xPos - enemy.collisionRadius) * scale,
           (enemy.yPos - enemy.collisionRadius) * scale,
           100 * (enemy.collisionRadius / 50) * scale,
           160 * (enemy.collisionRadius / 50) * scale);
-/*        ctx.arc(
-          enemy.xPos * scale,
-          enemy.yPos * scale,
-          enemy.collisionRadius * scale, 0, Math.PI*2
-        );*/
 
-
-        ctx.fill();
+        ctx.globalAlpha = 1;
       }
     }))));
   	requestAnimationFrame(renderLoop);
