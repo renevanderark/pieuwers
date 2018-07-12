@@ -22,8 +22,8 @@ const initialState : MultiBulletState  = {
 
 const fly = (bullet : BulletState) : BulletState => ({
   ...bullet,
-  xPos: bullet.explosion < 0 ? bullet.xPos + Math.cos(bullet.trajectory) * 10 : bullet.xPos,
-  yPos: bullet.explosion < 0 ? bullet.yPos + Math.sin(bullet.trajectory) * 10 : bullet.yPos,
+  xPos: bullet.xPos + Math.cos(bullet.trajectory) * (bullet.explosion < 0 ? 10 : 15),
+  yPos: bullet.yPos + Math.sin(bullet.trajectory) * (bullet.explosion < 0 ? 10 : 15),
   explosion: bullet.explosion > 0 ? bullet.explosion - 1 : -1
 });
 

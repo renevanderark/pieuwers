@@ -79,6 +79,8 @@ const pieuwerOnePng = new Image();
 pieuwerOnePng.src = "./img/pieuwerOne.png";
 const pieuwerTwoPng = new Image();
 pieuwerTwoPng.src = "./img/pieuwerTwo.png";
+const enemyPng = new Image();
+enemyPng.src = "./img/enemy.png";
 
 
 class Pieuwer implements Drawable {
@@ -146,7 +148,7 @@ const game = () => {
       clear: () => {},
       draw: (ctx: CanvasRenderingContext2D, scale: number) => {
         ctx.beginPath();
-        ctx.fillStyle = `rgba(255,255,255,${bs.explosion < 0 ? 1 : bs.explosion / 10})`;
+        ctx.fillStyle = `rgba(255,255,255,${bs.explosion < 0 ? 1 : bs.explosion / 8})`;
         ctx.arc(
           bs.xPos * scale,
           bs.yPos * scale,
@@ -159,12 +161,20 @@ const game = () => {
       clear: () => {},
       draw: (ctx: CanvasRenderingContext2D, scale: number) => {
         ctx.beginPath();
-        ctx.fillStyle = `rgba(255,0,0,${enemy.health / enemy.maxHealth})`;
-        ctx.arc(
+        //ctx.fillStyle = `rgba(255,0,255,${enemy.health / enemy.maxHealth})`;
+        ctx.globalAlpha = (enemy.health / enemy.maxHealth) * 0.5 + 0.5;
+        ctx.drawImage(enemyPng,0,0, 100, 160,
+          (enemy.xPos - enemy.collisionRadius) * scale,
+          (enemy.yPos - enemy.collisionRadius) * scale,
+          100 * (enemy.collisionRadius / 50) * scale,
+          160 * (enemy.collisionRadius / 50) * scale);
+/*        ctx.arc(
           enemy.xPos * scale,
           enemy.yPos * scale,
           enemy.collisionRadius * scale, 0, Math.PI*2
-        );
+        );*/
+
+
         ctx.fill();
       }
     }))));
@@ -207,7 +217,7 @@ const game = () => {
 };
 
 function preload() {
-  if (pieuwerOnePng.complete && pieuwerTwoPng.complete) {
+  if (pieuwerOnePng.complete && pieuwerTwoPng.complete && enemyPng.complete) {
     game();
   } else {
     setTimeout(preload, 1);
