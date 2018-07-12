@@ -8,7 +8,7 @@ const {app, BrowserWindow} = require('electron')
     if (process.env.NODE_ENV === 'development') {
       win.loadURL(`file://${__dirname}/index.html`);
     } else {
-      win.loadURL("https://renevanderark.github.io/pieuwers/");
+      win.loadURL(`https://renevanderark.github.io/pieuwers/?${new Date().getTime()}`);
     }
   }
 
