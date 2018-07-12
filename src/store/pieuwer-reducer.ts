@@ -3,11 +3,11 @@ import { AnyAction } from "redux";
 import { VIRT_WIDTH, VIRT_HEIGHT } from "./constants";
 import { KeyAction } from "../actions/action-creators";
 
-const yAcceleration = 0.1;
+const yAcceleration = 0.25;
 const maxYSpeed = 3;
 const minYSpeed = -1.5;
 
-const turnAcceleration = 1;
+const turnAcceleration = 1.5;
 const maxAngle = 30;
 const minAngle = -30;
 
@@ -20,19 +20,21 @@ export enum PieuwerControl {
 
 
 export interface PieuwerState {
-  accelerateUp: boolean,
-  accelerateDown: boolean,
-  accelerateLeft: boolean,
-  accelerateRight: boolean,
-  angle: number,
-  ySpeed: number,
-  xPos: number,
-  yPos: number,
+  accelerateUp: boolean
+  accelerateDown: boolean
+  accelerateLeft: boolean
+  accelerateRight: boolean
+  angle: number
+  ySpeed: number
+  xPos: number
+  yPos: number
   shooting: boolean
+  health: number
+  collisionRadius: number
 }
 
 export interface MultiPieuwerState {
-  pieuwerOne: PieuwerState,
+  pieuwerOne: PieuwerState
   pieuwerTwo: PieuwerState
 }
 
@@ -40,6 +42,8 @@ const initializePieuwerState = (xPos : number) : PieuwerState => ({
   accelerateLeft: false, accelerateRight: false,
   accelerateUp: false, accelerateDown: false,
   angle: 0, ySpeed: 0, shooting: false,
+  collisionRadius: 50,
+  health: 100,
   yPos: VIRT_HEIGHT - 150, xPos: xPos
 });
 

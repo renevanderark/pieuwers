@@ -1,6 +1,7 @@
 import { Dispatch, AnyAction } from "redux";
 import { ActionTypes } from "./action-types";
-import { PieuwerControl, PieuwerKey } from "../store/pieuwer-reducer";
+import { PieuwerControl, PieuwerKey, PieuwerState } from "../store/pieuwer-reducer";
+import { EnemyState } from "../store/enemy-reducer";
 
 
 
@@ -46,12 +47,50 @@ export interface KeyAction  {
 
 export interface BulletAction {
   type: ActionTypes
-  xPos: number
-  yPos: number
-  trajectory: number
+  xPos?: number
+  yPos?: number
+  trajectory?: number
+  bulletIdx?: number
 }
 
+export interface EnemyAction {
+  type: ActionTypes
+  spawn?: EnemyState
+  enemyIdx?: number
+}
 
+const makeEnemy = (xPos : number, yPos : number, health? : number, collisionRadius?: number) : EnemyState => ({
+  accelerateLeft: false, accelerateRight: false,
+  accelerateUp: false, accelerateDown: false,
+  angle: 0, ySpeed: 0, shooting: false,
+  collisionRadius: collisionRadius || 20,
+  health: health || 1, maxHealth: health || 1,
+  yPos: yPos, xPos: xPos
+});
+
+export const enemyActionCreator = (dispatch : Dispatch<EnemyAction|BulletAction>) => ({
+  spawnEnemy: (xPos : number, yPos : number, health? : number, collisionRadius?: number) => {
+    dispatch({type: ActionTypes.SPAWN_ENEMY, spawn: makeEnemy(xPos, yPos, health, collisionRadius)})
+  },
+  enemiesReceiveBullet: ({bulletIdx, enemies} : {bulletIdx : number, enemies: Array<number>}) => {
+    enemies.forEach(enemyIdx => dispatch({type: ActionTypes.ENEMY_RECEIVES_BULLET, enemyIdx: enemyIdx, bulletIdx: bulletIdx}));
+
+  }
+});
+
+export const bulletActionCreator = (dispatch : Dispatch<BulletAction>) => ({
+  spawnBullet: (pieuwer : PieuwerState) =>  {
+    if (pieuwer.shooting) {
+      const trajectory = (pieuwer.angle - 90) * (Math.PI / 180)
+      dispatch({
+        type: ActionTypes.SPAWN_BULLET,
+        xPos: pieuwer.xPos + Math.cos(trajectory) * 50,
+        yPos: pieuwer.yPos + Math.sin(trajectory) * 50,
+        trajectory: trajectory
+      });
+    }
+  }
+});
 
 export const keyActionCreator = (dispatch : Dispatch<KeyAction>) => ({
   onKeyDown: (key : string) => dispatch({type: ActionTypes.KEYDOWN, key: KeyboardToPieuwerControlMap[key], player: KeyboardToPlayerControlMap[key]}),

@@ -1,6 +1,6 @@
 import { createStore, combineReducers  } from 'redux';
 import reducers, { GameState } from './store/reducers';
-import { keyActionCreator } from './actions/action-creators';
+import { keyActionCreator, bulletActionCreator, enemyActionCreator } from './actions/action-creators';
 import { ActionTypes } from './actions/action-types';
 
 import getFrameRenderer from "./resizable-canvas/frame-renderer";
@@ -11,10 +11,14 @@ import { VIRT_HEIGHT, VIRT_WIDTH } from './store/constants';
 import { PieuwerState } from './store/pieuwer-reducer';
 import { Drawable } from './resizable-canvas/drawable';
 import { initPadEvents } from "padevents";
+import { COLLISION_GRID_SIZE, EnemyState } from './store/enemy-reducer';
+import { BulletState } from './store/bullet-reducer';
 
 const store = createStore(combineReducers(reducers));
-const {  onKeyUp, onKeyDown, onGamePadButtonUp, onGamePadButtonDown } = keyActionCreator(store.dispatch);
 
+const {  onKeyUp, onKeyDown, onGamePadButtonUp, onGamePadButtonDown } = keyActionCreator(store.dispatch);
+const { spawnBullet } = bulletActionCreator(store.dispatch);
+const { spawnEnemy, enemiesReceiveBullet } = enemyActionCreator(store.dispatch);
 
 const pieuwerLayer = document.getElementById("pieuwer-layer");
 const pieuwerTwoLayer = document.getElementById("pieuwer2-layer");
@@ -69,6 +73,7 @@ eventListeners.add("keyup", (ev : KeyboardEvent) => { onKeyUp(ev.key); return ev
 });
 
 const debug = document.getElementById("debug");
+let updateTime = 0;
 
 class Pieuwer implements Drawable {
   state: PieuwerState
@@ -130,11 +135,11 @@ pieuwerOneFrameRenderer.render([pieuwerOne]);
 pieuwerTwoFrameRenderer.render([pieuwerTwo]);
 
 const renderLoop = () => {
-  const { pieuwerStates, bulletStates } : GameState = store.getState();
+  const { pieuwerStates, bulletStates, enemyStates } : GameState = store.getState();
 
   pieuwerOne.updateState(pieuwerStates.pieuwerOne);
   pieuwerTwo.updateState(pieuwerStates.pieuwerTwo);
-//  debug.innerHTML = JSON.stringify(store.getState(), null, 2);
+  debug.innerHTML = `${updateTime}\n${JSON.stringify(store.getState().enemyStates.collisionGrid, null, 2)}`;
 
   bulletFrameRenderer.clear();
 
@@ -144,38 +149,62 @@ const renderLoop = () => {
     updated: () => true,
     clear: () => {},
     draw: (ctx: CanvasRenderingContext2D, scale: number) => {
-      ctx.fillStyle = "white";
-      ctx.fillRect(bs.xPos * scale, bs.yPos * scale, 5 * scale, 5 * scale);
+      ctx.beginPath();
+      ctx.fillStyle = `rgba(0,0,255,${bs.explosion < 0 ? 1 : bs.explosion / 10})`;
+      ctx.arc(
+        bs.xPos * scale,
+        bs.yPos * scale,
+        5 * scale * (bs.explosion < 0 ? 1 : (5 - bs.explosion) * 2), 0, Math.PI*2
+      );
+      ctx.fill();
     }
-  })));
+  })).concat(enemyStates.enemies.map((enemy) => ({
+    updated: () => true,
+    clear: () => {},
+    draw: (ctx: CanvasRenderingContext2D, scale: number) => {
+      ctx.beginPath();
+      ctx.fillStyle = `rgba(255,0,0,${enemy.health / enemy.maxHealth})`;
+      ctx.arc(
+        enemy.xPos * scale,
+        enemy.yPos * scale,
+        enemy.collisionRadius * scale, 0, Math.PI*2
+      );
+      ctx.fill();
+    }
+  }))));
 	requestAnimationFrame(renderLoop);
 };
 
+for (let i = 0; i < 16; i++) {
+  spawnEnemy(i * 100, 150);
+  spawnEnemy(i * 100 + 50, 250);
+}
+spawnEnemy(500, 500, 50, 150);
+
+const bulletToCollisionKey = (bullet : BulletState) : string =>
+  `${Math.floor(bullet.xPos / COLLISION_GRID_SIZE) * COLLISION_GRID_SIZE}-${Math.floor(bullet.yPos / COLLISION_GRID_SIZE) *  COLLISION_GRID_SIZE}`;
+
+const enemyCollidesWithBullet = (bullet : BulletState, enemy: EnemyState) : boolean =>
+  Math.sqrt(Math.pow(bullet.xPos - enemy.xPos, 2) + Math.pow(bullet.yPos - enemy.yPos, 2)) < enemy.collisionRadius;
+
 const updateLoop = () => {
-  store.dispatch({type: ActionTypes.UPDATE})
+  const { bulletStates : { bullets }, enemyStates : { collisionGrid, enemies } } : GameState = store.getState();
+  let collisions = bullets
+    .map((bullet, bulletIdx) => ({
+      enemies: collisionGrid[bulletToCollisionKey(bullet)].filter((enemyIdx) => enemyCollidesWithBullet(bullet, enemies[enemyIdx])),
+      bulletIdx: bulletIdx
+    }))
+    .filter(({enemies, bulletIdx}) => bullets[bulletIdx].explosion < 0)
+    .forEach(enemiesReceiveBullet)
+
+  store.dispatch({type: ActionTypes.UPDATE});
 }
 
 window.setInterval(updateLoop, 10);
 window.setInterval(() => {
   const { pieuwerOne, pieuwerTwo } = store.getState().pieuwerStates;
-  if (pieuwerOne.shooting) {
-    const trajectory = (pieuwerOne.angle - 90) * (Math.PI / 180);
-    store.dispatch({
-      type: ActionTypes.SPAWN_BULLET,
-      xPos: pieuwerOne.xPos + Math.cos(trajectory) * 50,
-      yPos: pieuwerOne.yPos + Math.sin(trajectory) * 50,
-      trajectory: trajectory
-    });
-  }
-  if (pieuwerTwo.shooting) {
-    const trajectory = (pieuwerTwo.angle - 90) * (Math.PI / 180);
-    store.dispatch({
-      type: ActionTypes.SPAWN_BULLET,
-      xPos: pieuwerTwo.xPos + Math.cos(trajectory) * 50,
-      yPos: pieuwerTwo.yPos + Math.sin(trajectory) * 50,
-      trajectory: trajectory
-    });
-  }
+  spawnBullet(pieuwerOne);
+  spawnBullet(pieuwerTwo);
 }, 50);
 
 renderLoop();
