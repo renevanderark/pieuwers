@@ -6,7 +6,7 @@ const {app, BrowserWindow} = require('electron')
 
     // and load the index.html of the app.
     if (process.env.NODE_ENV === 'development') {
-      win.loadFile("index.html")
+      win.loadURL(`file://${__dirname}/index.html`);
     } else {
       win.loadURL("https://renevanderark.github.io/pieuwers/");
     }

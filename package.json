@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/renevanderark/pieuwers/issues"
   },
-  "homepage": "https://github.com/renevanderark/pieuwers#readme"
+  "homepage": "https://github.com/renevanderark/pieuwers#readme",
+  "dependencies": {
+    "electron": "1.7.12"
+  }
 }
