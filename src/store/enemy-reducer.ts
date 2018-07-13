@@ -2,6 +2,8 @@ import { ActionTypes } from "../actions/action-types";
 import { PieuwerState } from "./pieuwer-reducer";
 import { EnemyAction } from "../actions/action-creators";
 import { VIRT_HEIGHT, VIRT_WIDTH } from "./constants";
+import { pointWithinBox, boxesOverlap } from "../phyz/boxes";
+import { Box } from "../phyz/shapes";
 
 export interface EnemyState extends PieuwerState {
   maxHealth: number
@@ -30,54 +32,20 @@ const initialState : MultiEnemyState =  {
 }
 export const COLLISION_GRID_SIZE = 200;
 
+const enemyWithinGridBox = (enemy : EnemyState, gX : number, gY : number) : boolean =>
+  boxesOverlap(
+    {x: enemy.xPos - enemy.collisionRadius, y: enemy.yPos - enemy.collisionRadius, w:enemy.collisionRadius*2, h:enemy.collisionRadius*2},
+    {x: gX, y: gY, w: COLLISION_GRID_SIZE, h: COLLISION_GRID_SIZE}
+  );
+
 const updateCollisionGrid = (state : MultiEnemyState) : MultiEnemyState => {
     let newCollsionGrid : CollisionGrid = {};
     for(let x = 0; x < VIRT_WIDTH; x += COLLISION_GRID_SIZE) {
       for(let y = 0; y < VIRT_HEIGHT; y += COLLISION_GRID_SIZE) {
-        newCollsionGrid[`${x}-${y}`] = [];
-        state.enemies.forEach((enemy, idx) => {
-          const l = enemy.xPos - enemy.collisionRadius;
-          const r = enemy.xPos + enemy.collisionRadius;
-          const t = enemy.yPos - enemy.collisionRadius;
-          const b = enemy.yPos + enemy.collisionRadius;
-          const gB = y + COLLISION_GRID_SIZE;
-          const gR = x + COLLISION_GRID_SIZE;
-
-          // boundingBox within gridPos
-          if (l >= x && l <= gR && t >= y && t <= gB) { // topLeft
-            newCollsionGrid[`${x}-${y}`].push(idx);
-            return;
-          }
-          if (r >= x && r <= gR && t >= y && t <= gB) { // topRight
-            newCollsionGrid[`${x}-${y}`].push(idx);
-            return;
-          }
-          if (l >= x && l <= gR && b >= y && b <= gB) { // bottomLeft
-            newCollsionGrid[`${x}-${y}`].push(idx);
-            return;
-          }
-          if (r >= x && r <= gR && b >= y && b <= gB) { // bottomRight
-            newCollsionGrid[`${x}-${y}`].push(idx);
-            return;
-          }
-          // gridPos within bounding box
-          if (x >= l && x <= r && y >= t && y <= b) { // topLeft
-            newCollsionGrid[`${x}-${y}`].push(idx);
-            return;
-          }
-          if (gR >= l && gR <= r && y >= t && y <= b) { // topRight
-            newCollsionGrid[`${x}-${y}`].push(idx);
-            return;
-          }
-          if (x >= l && x <= r && gB >= t && gB <= b) { // bottomLeft
-            newCollsionGrid[`${x}-${y}`].push(idx);
-            return;
-          }
-          if (gR >= l && gR <= r && gB >= t && gB <= b) { // bottomRight
-            newCollsionGrid[`${x}-${y}`].push(idx);
-            return;
-          }
-        });
+        newCollsionGrid[`${x}-${y}`] = state.enemies
+          .map((enemy, idx) => ({idx: idx, overlaps: enemyWithinGridBox(enemy, x, y)}))
+          .filter(({idx, overlaps}) => overlaps)
+          .map(({idx}) => idx);
       }
     }
 
