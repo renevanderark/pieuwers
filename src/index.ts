@@ -14,6 +14,7 @@ import { initPadEvents } from "padevents";
 import { COLLISION_GRID_SIZE, EnemyState } from './store/enemy-reducer';
 import { BulletState } from './store/bullet-reducer';
 import { Point } from './phyz/shapes';
+import { ExplosionState } from './store/explosion-reducer';
 
 const store = createStore(combineReducers(reducers));
 
@@ -84,114 +85,71 @@ pieuwerTwoPng.src = "./img/pieuwerTwo.png";
 const enemyPng = new Image();
 enemyPng.src = "./img/enemy.png";
 
-
-class Pieuwer implements Drawable {
-  state: PieuwerState
-  stateChanged: boolean
-  clearX: number
-  clearY: number
-  img: HTMLImageElement
-
-  constructor(state : PieuwerState, img : HTMLImageElement) {
-    this.state = state;
-    this.stateChanged = true;
-    this.clearX = state.xPos;
-    this.clearY = state.yPos;
-    this.img = img;
-  }
-  updateState(newState : PieuwerState) {
-    this.stateChanged =
-      this.state.yPos !== newState.yPos ||
-      this.state.xPos !== newState.xPos ||
-      this.state.angle !== newState.angle;
-    this.state = newState;
-  }
-  draw(ctx: CanvasRenderingContext2D, scale: number) {
-    ctx.save();
-    ctx.translate(this.state.xPos * scale, this.state.yPos * scale);
-    ctx.rotate(this.state.angle * Math.PI / 180);
-    ctx.drawImage(this.img,0,0, 240, 240, -120*scale, -120*scale, 240*scale,240*scale );0
-    ctx.restore();
-
-
-    this.stateChanged = false;
-    this.clearX = this.state.xPos;
-    this.clearY = this.state.yPos;
-  }
-  clear(ctx: CanvasRenderingContext2D, scale: number) {
-    ctx.clearRect(
-			(this.clearX - 150) * scale,
-			(this.clearY - 150) * scale,
-			300 * scale, 300 * scale
-		);
-  }
-  updated() { return this.stateChanged; }
-}
-
 const handleBulletEnemyCollision = (params : {bulletIdx : number, enemies: Array<number>, collsionPos : Point}) => {
   enemiesReceiveBullet(params);
   spawnExplosion(params.collsionPos, 5)
 }
 
-const game = () => {
-  const pieuwerOne = new Pieuwer(store.getState().pieuwerStates.pieuwerOne, pieuwerOnePng);
-  const pieuwerTwo = new Pieuwer(store.getState().pieuwerStates.pieuwerTwo, pieuwerTwoPng);
-  pieuwerOneFrameRenderer.render([pieuwerOne]);
-  pieuwerTwoFrameRenderer.render([pieuwerTwo]);
+const drawPieuwer = (img : HTMLImageElement, ps : PieuwerState) : Drawable =>
+  (ctx: CanvasRenderingContext2D, scale: number) => {
+    ctx.save();
+    ctx.translate(ps.xPos * scale, ps.yPos * scale);
+    ctx.rotate(ps.angle * Math.PI / 180);
+    ctx.drawImage(img, 0, 0, 240, 240, -120*scale, -120*scale, 240*scale, 240*scale);
+    ctx.restore();
+  };
 
+const drawBullet = (bs : BulletState) : Drawable =>
+  (ctx: CanvasRenderingContext2D, scale: number) => {
+      ctx.beginPath();
+      ctx.fillStyle = `rgb(255,255,255)`;
+      ctx.arc(
+        bs.xPos * scale,
+        bs.yPos * scale,
+        5 * scale, 0, Math.PI*2
+      );
+      ctx.fill();
+    };
+
+const drawEnemy = (enemy : EnemyState) : Drawable =>
+  (ctx: CanvasRenderingContext2D, scale: number) => {
+    ctx.beginPath();
+    ctx.globalAlpha = (enemy.health / enemy.maxHealth) * 0.5 + 0.5;
+    ctx.drawImage(enemyPng,0,0, 100, 160,
+      (enemy.xPos - enemy.collisionRadius) * scale,
+      (enemy.yPos - enemy.collisionRadius) * scale,
+      100 * (enemy.collisionRadius / 50) * scale,
+      160 * (enemy.collisionRadius / 50) * scale);
+
+    ctx.globalAlpha = 1;
+  };
+
+const drawExplosion = (explosion : ExplosionState) =>
+  (ctx: CanvasRenderingContext2D, scale: number) => {
+    ctx.beginPath();
+    ctx.fillStyle = `rgba(255,255,255, ${0.5 + ((explosion.size / explosion.initSize) * 0.5)})`;
+    ctx.arc(
+      explosion.pos.x * scale,
+      explosion.pos.y * scale,
+      5 * scale * (explosion.initSize - explosion.size), 0, Math.PI*2
+    );
+    ctx.fill();
+  };
+
+const game = () => {
   const renderLoop = () => {
     const { pieuwerStates, bulletStates, enemyStates, explosionStates } : GameState = store.getState();
-
-    pieuwerOne.updateState(pieuwerStates.pieuwerOne);
-    pieuwerTwo.updateState(pieuwerStates.pieuwerTwo);
   //  debug.innerHTML = `${updateTime}\n${JSON.stringify(store.getState().enemyStates.collisionGrid, null, 2)}`;
 
     bulletFrameRenderer.clear();
-
-    pieuwerOneFrameRenderer.render([pieuwerOne]);
-    pieuwerTwoFrameRenderer.render([pieuwerTwo]);
-    bulletFrameRenderer.render(bulletStates.bullets.map((bs) => ({
-      updated: () => true,
-      clear: () => {},
-      draw: (ctx: CanvasRenderingContext2D, scale: number) => {
-        ctx.beginPath();
-        ctx.fillStyle = `rgb(255,255,255)`;
-        ctx.arc(
-          bs.xPos * scale,
-          bs.yPos * scale,
-          5 * scale, 0, Math.PI*2
-        );
-        ctx.fill();
-      }
-    })).concat(enemyStates.enemies.map((enemy) => ({
-      updated: () => true,
-      clear: () => {},
-      draw: (ctx: CanvasRenderingContext2D, scale: number) => {
-        ctx.beginPath();
-        ctx.globalAlpha = (enemy.health / enemy.maxHealth) * 0.5 + 0.5;
-        ctx.drawImage(enemyPng,0,0, 100, 160,
-          (enemy.xPos - enemy.collisionRadius) * scale,
-          (enemy.yPos - enemy.collisionRadius) * scale,
-          100 * (enemy.collisionRadius / 50) * scale,
-          160 * (enemy.collisionRadius / 50) * scale);
-
-        ctx.globalAlpha = 1;
-      }
-    }))).concat(explosionStates.explosions.map(explosion => ({
-      updated: () => true,
-      clear: () => {},
-      draw: (ctx: CanvasRenderingContext2D, scale: number) => {
-        ctx.beginPath();
-        ctx.fillStyle = `rgba(255,255,255, ${0.5 + ((explosion.size / explosion.initSize) * 0.5)})`;
-        ctx.arc(
-          explosion.pos.x * scale,
-          explosion.pos.y * scale,
-          5 * scale * (explosion.initSize - explosion.size), 0, Math.PI*2
-        );
-        ctx.fill();
-      }
-    })))
-    );
+    bulletFrameRenderer.render([
+        drawPieuwer(pieuwerOnePng, pieuwerStates.pieuwerOne),
+        drawPieuwer(pieuwerTwoPng, pieuwerStates.pieuwerTwo),
+      ].concat(
+      bulletStates.bullets.map(drawBullet)).concat(
+      enemyStates.enemies.map(drawEnemy)).concat(
+      explosionStates.explosions.map(drawExplosion)
+    ));
   	requestAnimationFrame(renderLoop);
   };
 
@@ -209,7 +167,7 @@ const game = () => {
 
   const updateLoop = () => {
     const { bulletStates : { bullets }, enemyStates : { collisionGrid, enemies } } : GameState = store.getState();
-    let collisions = bullets
+    bullets
       .map((bullet, bulletIdx) => ({
         enemies: (collisionGrid[bulletToCollisionKey(bullet)]||[])
           .filter((enemyIdx) => enemyCollidesWithBullet(bullet, enemies[enemyIdx])),
