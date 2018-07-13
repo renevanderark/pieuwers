@@ -3,6 +3,7 @@ import { Drawable } from "./resizable-canvas/drawable";
 import { PieuwerState, PieuwerKey } from "./store/pieuwer-reducer";
 import { EnemyState } from "./store/enemy-reducer";
 import { ExplosionState } from "./store/explosion-reducer";
+import { isBox, Box, Circle } from "./phyz/shapes";
 
 
 const pieuwerOnePng = new Image();
@@ -41,7 +42,7 @@ export const drawBullet = (bs : BulletState) : Drawable =>
       ctx.arc(
         bs.pos.x * scale,
         bs.pos.y * scale,
-        5 * scale, 0, Math.PI*2
+        3 * scale, 0, Math.PI*2
       );
       ctx.fill();
     };
@@ -50,12 +51,31 @@ export const drawEnemy = (enemy : EnemyState) : Drawable =>
   (ctx: CanvasRenderingContext2D, scale: number) => {
     ctx.beginPath();
     ctx.globalAlpha = (enemy.health / enemy.maxHealth) * 0.5 + 0.5;
+    ctx.strokeStyle = "white";
     ctx.drawImage(enemyPng,0,0, 100, 160,
-      (enemy.pos.x - enemy.collisionRadius) * scale,
-      (enemy.pos.y - enemy.collisionRadius) * scale,
-      100 * (enemy.collisionRadius / 50) * scale,
-      160 * (enemy.collisionRadius / 50) * scale);
-
+      (enemy.pos.x - enemy.size.x / 2) * scale,
+      (enemy.pos.y - enemy.size.y / 2) * scale,
+      enemy.size.x * scale,
+      enemy.size.y * scale);
+    /*
+    enemy.collisionShapes.forEach(shape => {
+      if (isBox(shape)) {
+        ctx.strokeRect(
+          (enemy.pos.x + shape.x) * scale,
+          (enemy.pos.y + shape.y) * scale,
+          (<Box>shape).w * scale,
+          (<Box>shape).h * scale,
+        );
+      } else {
+        ctx.arc(
+          (enemy.pos.x + shape.x) * scale,
+          (enemy.pos.y + shape.y) * scale,
+          (<Circle>shape).radius * scale,
+          0, Math.PI*2
+        );
+        ctx.stroke();
+      }
+    });*/
     ctx.globalAlpha = 1;
   };
 

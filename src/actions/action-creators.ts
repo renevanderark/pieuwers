@@ -66,18 +66,45 @@ export interface ExplosionAction {
   size: number
 }
 
-const makeEnemy = (xPos : number, yPos : number, health? : number, collisionRadius?: number) : EnemyState => ({
+const ENEMY_WIDTH = 100;
+const ENEMY_HEIGHT = 160;
+
+const makeEnemy = (xPos : number, yPos : number, size: Point, health? : number) : EnemyState => ({
   accelerateLeft: false, accelerateRight: false,
   accelerateUp: false, accelerateDown: false,
   angle: 0, ySpeed: 0, shooting: false,
-  collisionRadius: collisionRadius || 20,
+  size: size,
+  collisionShapes: [
+    {
+      x: (4 -  (ENEMY_WIDTH  / 2)) * (size.x / ENEMY_WIDTH),
+      y: (63 - (ENEMY_HEIGHT / 2)) * (size.y / ENEMY_HEIGHT),
+      w: 26 * (size.x / ENEMY_WIDTH),
+      h: 95 * (size.y / ENEMY_HEIGHT)
+    },
+    {
+      x: (30 -  (ENEMY_WIDTH  / 2)) * (size.x / ENEMY_WIDTH),
+      y: (63 - (ENEMY_HEIGHT / 2)) * (size.y / ENEMY_HEIGHT),
+      w: 51 * (size.x / ENEMY_WIDTH),
+      h: 82 * (size.y / ENEMY_HEIGHT)
+    },
+    {
+      x: (58 -  (ENEMY_WIDTH  / 2)) * (size.x / ENEMY_WIDTH),
+      y: (42 - (ENEMY_HEIGHT / 2)) * (size.y / ENEMY_HEIGHT),
+      radius: 40 * (size.x / ENEMY_WIDTH)
+    },
+    {
+      x: (27 -  (ENEMY_WIDTH  / 2)) * (size.x / ENEMY_WIDTH),
+      y: (50 - (ENEMY_HEIGHT / 2)) * (size.y / ENEMY_HEIGHT),
+      radius: 20 * (size.x / ENEMY_WIDTH)
+    }
+  ],
   health: health || 4, maxHealth: health || 4,
   pos: {y: yPos, x: xPos}
 });
 
 export const enemyActionCreator = (dispatch : Dispatch<EnemyAction|BulletAction>) => ({
-  spawnEnemy: (xPos : number, yPos : number, health? : number, collisionRadius?: number) => {
-    dispatch({type: ActionTypes.SPAWN_ENEMY, spawn: makeEnemy(xPos, yPos, health, collisionRadius)})
+  spawnEnemy: (xPos : number, yPos : number, size: Point, health? : number) => {
+    dispatch({type: ActionTypes.SPAWN_ENEMY, spawn: makeEnemy(xPos, yPos, size, health)})
   },
   enemiesReceiveBullet: ({bulletIdx, enemies} : {bulletIdx : number, enemies: Array<number>}) => {
     enemies.forEach(enemyIdx => dispatch({type: ActionTypes.ENEMY_RECEIVES_BULLET, enemyIdx: enemyIdx, bulletIdx: bulletIdx}));

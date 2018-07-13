@@ -2,7 +2,7 @@ import { ActionTypes  } from "../actions/action-types";
 import { AnyAction } from "redux";
 import { VIRT_WIDTH, VIRT_HEIGHT } from "./constants";
 import { KeyAction } from "../actions/action-creators";
-import { Point } from "../phyz/shapes";
+import { Point, Box, Circle } from "../phyz/shapes";
 import { guardNumber } from "../phyz/guard-number";
 
 const yAcceleration = 0.25;
@@ -10,8 +10,8 @@ const maxYSpeed = 3;
 const minYSpeed = -1.5;
 
 const turnAcceleration = 1.5;
-const maxAngle = 30;
-const minAngle = -30;
+const maxAngle = 15;
+const minAngle = -15;
 
 type stateKey = "accelerateUp"|"accelerateDown"|"accelerateLeft"|"accelerateRight"|"shooting";
 export type PieuwerKey = "pieuwerOne"|"pieuwerTwo";
@@ -26,12 +26,13 @@ export interface PieuwerState {
   accelerateDown: boolean
   accelerateLeft: boolean
   accelerateRight: boolean
+  collisionShapes: Array<Box|Circle>
   angle: number
   ySpeed: number
   pos: Point
+  size: Point
   shooting: boolean
   health: number
-  collisionRadius: number
 }
 
 export interface MultiPieuwerState {
@@ -43,9 +44,12 @@ const initializePieuwerState = (xPos : number) : PieuwerState => ({
   accelerateLeft: false, accelerateRight: false,
   accelerateUp: false, accelerateDown: false,
   angle: 0, ySpeed: 0, shooting: false,
-  collisionRadius: 50,
   health: 100,
-  pos: {x: xPos, y: VIRT_HEIGHT - 150}
+  collisionShapes: [
+    /* TODO */
+  ],
+  pos: {x: xPos, y: VIRT_HEIGHT - 150},
+  size: {x: 240, y: 240}
 });
 
 const initialState : MultiPieuwerState  = {
@@ -77,7 +81,7 @@ const updatePieuwerState = (pieuwerState : PieuwerState) : PieuwerState => ({
 
     pos: {
       y: guardNumber(Math.round(pieuwerState.pos.y - pieuwerState.ySpeed), VIRT_HEIGHT, 0),
-      x: guardNumber(Math.round(pieuwerState.pos.x + pieuwerState.angle * 0.1), VIRT_WIDTH, 0)
+      x: guardNumber(Math.round(pieuwerState.pos.x + pieuwerState.angle * 0.2), VIRT_WIDTH, 0)
     }
 });
 

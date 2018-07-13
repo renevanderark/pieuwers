@@ -86,10 +86,10 @@ const game = () => {
   store.subscribe(renderLoop);
 
   for (let i = 0; i < 16; i++) {
-    spawnEnemy(i * 100, 150);
-    spawnEnemy(i * 100 + 50, 250);
+    spawnEnemy(i * 100, 150, {x: 40, y: 64});
+    spawnEnemy(i * 100 + 50, 250, {x: 40, y: 64});
   }
-  spawnEnemy(500, 200, 50, 100);
+  spawnEnemy(500, 200, {x: 200, y: 320}, 100);
 
   const updateLoop = () => {
     detectBulletToEnemyCollisions(store.getState())

@@ -34,7 +34,7 @@ export const COLLISION_GRID_SIZE = 200;
 
 const enemyWithinGridBox = (enemy : EnemyState, gX : number, gY : number) : boolean =>
   boxesOverlap(
-    {x: enemy.pos.x - enemy.collisionRadius, y: enemy.pos.y - enemy.collisionRadius, w:enemy.collisionRadius*2, h:enemy.collisionRadius*2},
+    {x: enemy.pos.x - enemy.size.x / 2, y: enemy.pos.y - enemy.size.y / 2, w: enemy.size.x, h: enemy.size.y},
     {x: gX, y: gY, w: COLLISION_GRID_SIZE, h: COLLISION_GRID_SIZE}
   );
 
