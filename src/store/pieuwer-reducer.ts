@@ -1,6 +1,6 @@
 import { ActionTypes  } from "../actions/action-types";
 import { AnyAction } from "redux";
-import { VIRT_WIDTH, VIRT_HEIGHT } from "./constants";
+import { VIRT_WIDTH, VIRT_HEIGHT, PIEUWER_WIDTH, PIEUWER_HEIGHT } from "./constants";
 import { KeyAction } from "../actions/action-creators";
 import { Point, Box, Circle } from "../phyz/shapes";
 import { guardNumber } from "../phyz/guard-number";
@@ -39,6 +39,19 @@ export interface MultiPieuwerState {
   pieuwerOne: PieuwerState
   pieuwerTwo: PieuwerState
 }
+const range = (start : number, end : number, step : number = 1) : Array<number> => {
+    var range = [];
+    if (end < start) {
+        step = -step;
+    }
+    while (step > 0 ? end >= start : end <= start) {
+        range.push(start);
+        start += step;
+    }
+
+    return range;
+}
+
 
 const initializePieuwerState = (xPos : number) : PieuwerState => ({
   accelerateLeft: false, accelerateRight: false,
@@ -46,8 +59,18 @@ const initializePieuwerState = (xPos : number) : PieuwerState => ({
   angle: 0, ySpeed: 0, shooting: false,
   health: 100,
   collisionShapes: [
-    /* TODO */
-  ],
+    {x: (110 -  (PIEUWER_WIDTH  / 2)), y: (0 - (PIEUWER_HEIGHT / 2)), w: 20, h: 230},
+  ].concat(range(50, 100, 10).map(x => ({
+    x: (x -(PIEUWER_WIDTH  / 2)),
+    y: PIEUWER_HEIGHT - x - 90,
+    w: 10,
+    h: x - 40
+  }))).concat(range(10, 60, 10).map(x => ({
+    x: x,
+    y: 30 + (x*1.1),
+    w: 10,
+    h: 80 - x*1.1
+  }))),
   pos: {x: xPos, y: VIRT_HEIGHT - 150},
   size: {x: 240, y: 240}
 });

@@ -4,7 +4,7 @@ import { PieuwerState, PieuwerKey } from "./store/pieuwer-reducer";
 import { EnemyState } from "./store/enemy-reducer";
 import { ExplosionState } from "./store/explosion-reducer";
 import { isBox, Box, Circle } from "./phyz/shapes";
-import { ENEMY_WIDTH, ENEMY_HEIGHT } from "./store/constants";
+import { ENEMY_WIDTH, ENEMY_HEIGHT, PIEUWER_WIDTH, PIEUWER_HEIGHT } from "./store/constants";
 
 
 const pieuwerOnePng = new Image();
@@ -32,7 +32,33 @@ export const drawPieuwer = (pieuwerKey : PieuwerKey, ps : PieuwerState) : Drawab
     ctx.save();
     ctx.translate(ps.pos.x * scale, ps.pos.y * scale);
     ctx.rotate(ps.angle * Math.PI / 180);
-    ctx.drawImage(pieuwerPngs[pieuwerKey], 0, 0, 240, 240, -120*scale, -120*scale, 240*scale, 240*scale);
+    ctx.drawImage(pieuwerPngs[pieuwerKey], 0, 0,
+      PIEUWER_WIDTH, PIEUWER_HEIGHT,
+      -(PIEUWER_WIDTH/2)*scale, -(PIEUWER_HEIGHT / 2)*scale,
+      PIEUWER_WIDTH*scale, PIEUWER_HEIGHT*scale);
+
+    ctx.strokeStyle = "white";
+
+    ps.collisionShapes.forEach(shape => {
+      if (isBox(shape)) {
+        ctx.strokeRect(
+          shape.x * scale,
+          shape.y * scale,
+          (<Box>shape).w * scale,
+          (<Box>shape).h * scale,
+        );
+      } else {
+        ctx.beginPath();
+        ctx.arc(
+          shape.x * scale,
+          shape.y * scale,
+          (<Circle>shape).radius * scale,
+          0, Math.PI*2
+        );
+        ctx.stroke();
+        ctx.closePath();
+      }
+    });
     ctx.restore();
   };
 
