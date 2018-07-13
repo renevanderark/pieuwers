@@ -1,5 +1,5 @@
 import { createStore, combineReducers  } from 'redux';
-import { initPadEvents } from "padevents";
+import { initPadEvents } from "./padevents";
 
 import getFrameRenderer from "./resizable-canvas/frame-renderer";
 import getResizeListeners from "./resizable-canvas/resize-listeners";
@@ -29,18 +29,10 @@ const mainLayerCtx = mainLayer.getContext("2d");
 const mainFrameRenderer = getFrameRenderer(mainLayerCtx, mainLayer);
 
 
-let gamePadToPlayerMap : {[key : string] : "pieuwerOne"|"pieuwerTwo"} = {};
-initPadEvents({
-  onUnmappedButton : () => { },
-  onControllersChange: (controllerIds : Array<string>) => {
-    if (controllerIds.length > 0 && typeof gamePadToPlayerMap[controllerIds[0]] === 'undefined') {
-      gamePadToPlayerMap[controllerIds[0]] = "pieuwerOne";
-    }
-    if (controllerIds.length > 1 && typeof gamePadToPlayerMap[controllerIds[1]] === 'undefined') {
-      gamePadToPlayerMap[controllerIds[1]] = "pieuwerTwo";
-    }
-  }
-});
+let gamePadToPlayerMap : {[key : string] : "pieuwerOne"|"pieuwerTwo"} = {
+  "0": "pieuwerOne", "1": "pieuwerTwo"
+};
+initPadEvents();
 
 const eventListeners = getEventListeners();
 eventListeners.add("keydown", (ev : KeyboardEvent) => { onKeyDown(ev.key); });
@@ -52,6 +44,32 @@ eventListeners.add("keyup", (ev : KeyboardEvent) => { onKeyUp(ev.key); });
 ['up', 'left', 'right', 'down'].forEach(k => {
   eventListeners.add(`gamepad-${k}-pressed`, (ev : CustomEvent) => onGamePadButtonDown(k, gamePadToPlayerMap[ev.detail.controllerIndex]));
   eventListeners.add(`gamepad-${k}-released`, (ev : CustomEvent) => onGamePadButtonUp(k, gamePadToPlayerMap[ev.detail.controllerIndex]));
+});
+
+['r', 'l'].forEach(k => {
+  eventListeners.add(`gamepad-${k}-axis-x-change`, (ev : CustomEvent) =>  {
+    if(ev.detail.rounded > 0) {
+      onGamePadButtonDown('right', gamePadToPlayerMap[ev.detail.controllerIndex]);
+    } else if (ev.detail.rounded < 0) {
+      onGamePadButtonDown('left', gamePadToPlayerMap[ev.detail.controllerIndex]);
+    } else {
+      onGamePadButtonUp('left', gamePadToPlayerMap[ev.detail.controllerIndex]);
+      onGamePadButtonUp('right', gamePadToPlayerMap[ev.detail.controllerIndex]);
+    }
+  });
+});
+
+['r', 'l'].forEach(k => {
+  eventListeners.add(`gamepad-${k}-axis-y-change`, (ev : CustomEvent) =>  {
+    if(ev.detail.rounded > 0) {
+      onGamePadButtonDown('down', gamePadToPlayerMap[ev.detail.controllerIndex]);
+    } else if (ev.detail.rounded < 0) {
+      onGamePadButtonDown('up', gamePadToPlayerMap[ev.detail.controllerIndex]);
+    } else {
+      onGamePadButtonUp('up', gamePadToPlayerMap[ev.detail.controllerIndex]);
+      onGamePadButtonUp('down', gamePadToPlayerMap[ev.detail.controllerIndex]);
+    }
+  });
 });
 
 initViewPort(VIRT_WIDTH, VIRT_HEIGHT, getResizeListeners([mainLayer],
