@@ -77,8 +77,8 @@ const game = () => {
         drawPieuwer("pieuwerTwo", pieuwerStates.pieuwerTwo),
       ].concat(
       bulletStates.bullets.map(drawBullet)).concat(
-      enemyStates.enemies.map(drawEnemy)).concat(
-      explosionStates.explosions.map(drawExplosion)
+      explosionStates.explosions.map(drawExplosion)).concat(
+      enemyStates.enemies.map(drawEnemy)
     ));
   	requestAnimationFrame(renderLoop);
   };

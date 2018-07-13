@@ -53,7 +53,7 @@ export const drawEnemy = (enemy : EnemyState) : Drawable =>
     ctx.save();
     ctx.translate(enemy.pos.x * scale, enemy.pos.y * scale);
     ctx.rotate(enemy.angle * Math.PI / 180);
-    ctx.globalAlpha = (enemy.health / enemy.maxHealth) * 0.5 + 0.5;
+    //ctx.globalAlpha = (enemy.health / enemy.maxHealth) * 0.5 + 0.5;
     ctx.strokeStyle = "white";
     ctx.drawImage(enemyPng,0,0, ENEMY_WIDTH, ENEMY_HEIGHT,
       -(enemy.size.x / 2) * scale,
