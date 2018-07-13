@@ -3,6 +3,7 @@ import { ActionTypes } from "./action-types";
 import { PieuwerControl, PieuwerKey, PieuwerState } from "../store/pieuwer-reducer";
 import { EnemyState } from "../store/enemy-reducer";
 import { Point } from "../phyz/shapes";
+import { ENEMY_WIDTH, ENEMY_HEIGHT } from "../store/constants";
 
 
 
@@ -66,8 +67,6 @@ export interface ExplosionAction {
   size: number
 }
 
-const ENEMY_WIDTH = 100;
-const ENEMY_HEIGHT = 160;
 
 const makeEnemy = (xPos : number, yPos : number, size: Point, health? : number) : EnemyState => ({
   accelerateLeft: false, accelerateRight: false,

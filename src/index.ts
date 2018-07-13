@@ -80,16 +80,17 @@ const game = () => {
       enemyStates.enemies.map(drawEnemy)).concat(
       explosionStates.explosions.map(drawExplosion)
     ));
-//  	requestAnimationFrame(renderLoop);
+  	requestAnimationFrame(renderLoop);
   };
 
-  store.subscribe(renderLoop);
 
   for (let i = 0; i < 16; i++) {
-    spawnEnemy(i * 100, 150, {x: 40, y: 64});
-    spawnEnemy(i * 100 + 50, 250, {x: 40, y: 64});
+    spawnEnemy(i * 100, 150, {x: 60, y: 80});
+    spawnEnemy(i * 100 + 50, 250, {x: 60, y: 80});
   }
-  spawnEnemy(500, 200, {x: 200, y: 320}, 100);
+  spawnEnemy(200, 200, {x: 200, y: 320}, 100);
+  spawnEnemy(600, 200, {x: 200, y: 320}, 100);
+  spawnEnemy(1000, 200, {x: 200, y: 320}, 100);
 
   const updateLoop = () => {
     detectBulletToEnemyCollisions(store.getState())
