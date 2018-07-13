@@ -8,7 +8,6 @@ export interface BulletState {
   trajectory: number,
   xPos: number,
   yPos: number,
-  explosion: number
 }
 
 export interface MultiBulletState {
@@ -22,34 +21,25 @@ const initialState : MultiBulletState  = {
 
 const fly = (bullet : BulletState) : BulletState => ({
   ...bullet,
-  xPos: bullet.xPos + Math.cos(bullet.trajectory) * (bullet.explosion < 0 ? 10 : 15),
-  yPos: bullet.yPos + Math.sin(bullet.trajectory) * (bullet.explosion < 0 ? 10 : 15),
-  explosion: bullet.explosion > 0 ? bullet.explosion - 1 : -1
+  xPos: bullet.xPos + Math.cos(bullet.trajectory) * 10,
+  yPos: bullet.yPos + Math.sin(bullet.trajectory) * 10,
 });
 
 const withinBounds = (bullet : BulletState) : boolean  =>
   bullet.xPos > 0 && bullet.xPos < VIRT_WIDTH && bullet.yPos > 0 && bullet.yPos < VIRT_HEIGHT;
 
-const notExploded = (bullet : BulletState) : boolean  =>
-  bullet.explosion !== 0;
-
-
-export default function(state : MultiBulletState, action : BulletAction) {
+export default function(state : MultiBulletState, action : BulletAction) : MultiBulletState {
   if (typeof state === 'undefined') {
     return initialState;
   }
   switch (action.type) {
     case ActionTypes.ENEMY_RECEIVES_BULLET:
     return {
-      bullets: state.bullets.map((bullet, idx) => ({
-        ...bullet,
-        explosion: idx === action.bulletIdx ? 8 : bullet.explosion,
-      }))
+      bullets: state.bullets.filter((bullet, idx) => idx !== action.bulletIdx)
     };
     case ActionTypes.SPAWN_BULLET:
       return {
         bullets: state.bullets.concat({
-          explosion: -1,
           xPos: action.xPos,
           yPos: action.yPos,
           trajectory: action.trajectory
@@ -59,7 +49,6 @@ export default function(state : MultiBulletState, action : BulletAction) {
       return {
         bullets: state.bullets
           .map(fly)
-          .filter(notExploded)
           .filter(withinBounds)
       };
     default:

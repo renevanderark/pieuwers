@@ -2,6 +2,7 @@ import { Dispatch, AnyAction } from "redux";
 import { ActionTypes } from "./action-types";
 import { PieuwerControl, PieuwerKey, PieuwerState } from "../store/pieuwer-reducer";
 import { EnemyState } from "../store/enemy-reducer";
+import { Point } from "../phyz/shapes";
 
 
 
@@ -59,6 +60,12 @@ export interface EnemyAction {
   enemyIdx?: number
 }
 
+export interface ExplosionAction {
+  type: ActionTypes,
+  pos: Point
+  size: number
+}
+
 const makeEnemy = (xPos : number, yPos : number, health? : number, collisionRadius?: number) : EnemyState => ({
   accelerateLeft: false, accelerateRight: false,
   accelerateUp: false, accelerateDown: false,
@@ -74,9 +81,14 @@ export const enemyActionCreator = (dispatch : Dispatch<EnemyAction|BulletAction>
   },
   enemiesReceiveBullet: ({bulletIdx, enemies} : {bulletIdx : number, enemies: Array<number>}) => {
     enemies.forEach(enemyIdx => dispatch({type: ActionTypes.ENEMY_RECEIVES_BULLET, enemyIdx: enemyIdx, bulletIdx: bulletIdx}));
-
   }
 });
+
+export const explosionActionCreator = (dispatch : Dispatch<ExplosionAction>) => ({
+  spawnExplosion: (pos : Point, size: number) => {
+    dispatch({type: ActionTypes.SPAWN_EXPLOSION, pos: pos, size: size});
+  }
+})
 
 export const bulletActionCreator = (dispatch : Dispatch<BulletAction>) => ({
   spawnBullet: (pieuwer : PieuwerState) =>  {

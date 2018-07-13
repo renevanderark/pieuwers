@@ -4,5 +4,6 @@ export enum ActionTypes {
   UPDATE,
   SPAWN_BULLET,
   SPAWN_ENEMY,
+  SPAWN_EXPLOSION,
   ENEMY_RECEIVES_BULLET
 }

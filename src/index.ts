@@ -1,6 +1,6 @@
 import { createStore, combineReducers  } from 'redux';
 import reducers, { GameState } from './store/reducers';
-import { keyActionCreator, bulletActionCreator, enemyActionCreator } from './actions/action-creators';
+import { keyActionCreator, bulletActionCreator, enemyActionCreator, explosionActionCreator } from './actions/action-creators';
 import { ActionTypes } from './actions/action-types';
 
 import getFrameRenderer from "./resizable-canvas/frame-renderer";
@@ -13,12 +13,14 @@ import { Drawable } from './resizable-canvas/drawable';
 import { initPadEvents } from "padevents";
 import { COLLISION_GRID_SIZE, EnemyState } from './store/enemy-reducer';
 import { BulletState } from './store/bullet-reducer';
+import { Point } from './phyz/shapes';
 
 const store = createStore(combineReducers(reducers));
 
 const {  onKeyUp, onKeyDown, onGamePadButtonUp, onGamePadButtonDown } = keyActionCreator(store.dispatch);
 const { spawnBullet } = bulletActionCreator(store.dispatch);
 const { spawnEnemy, enemiesReceiveBullet } = enemyActionCreator(store.dispatch);
+const { spawnExplosion } = explosionActionCreator(store.dispatch);
 
 const pieuwerLayer = document.getElementById("pieuwer-layer");
 const pieuwerTwoLayer = document.getElementById("pieuwer2-layer");
@@ -126,6 +128,11 @@ class Pieuwer implements Drawable {
   updated() { return this.stateChanged; }
 }
 
+const handleBulletEnemyCollision = (params : {bulletIdx : number, enemies: Array<number>, collsionPos : Point}) => {
+  enemiesReceiveBullet(params);
+  spawnExplosion(params.collsionPos, 5)
+}
+
 const game = () => {
   const pieuwerOne = new Pieuwer(store.getState().pieuwerStates.pieuwerOne, pieuwerOnePng);
   const pieuwerTwo = new Pieuwer(store.getState().pieuwerStates.pieuwerTwo, pieuwerTwoPng);
@@ -133,7 +140,7 @@ const game = () => {
   pieuwerTwoFrameRenderer.render([pieuwerTwo]);
 
   const renderLoop = () => {
-    const { pieuwerStates, bulletStates, enemyStates } : GameState = store.getState();
+    const { pieuwerStates, bulletStates, enemyStates, explosionStates } : GameState = store.getState();
 
     pieuwerOne.updateState(pieuwerStates.pieuwerOne);
     pieuwerTwo.updateState(pieuwerStates.pieuwerTwo);
@@ -148,11 +155,11 @@ const game = () => {
       clear: () => {},
       draw: (ctx: CanvasRenderingContext2D, scale: number) => {
         ctx.beginPath();
-        ctx.fillStyle = `rgba(255,255,255,${bs.explosion < 0 ? 1 : bs.explosion / 8})`;
+        ctx.fillStyle = `rgb(255,255,255)`;
         ctx.arc(
           bs.xPos * scale,
           bs.yPos * scale,
-          5 * scale * (bs.explosion < 0 ? 1 : (8 - bs.explosion) * 2), 0, Math.PI*2
+          5 * scale, 0, Math.PI*2
         );
         ctx.fill();
       }
@@ -170,7 +177,21 @@ const game = () => {
 
         ctx.globalAlpha = 1;
       }
-    }))));
+    }))).concat(explosionStates.explosions.map(explosion => ({
+      updated: () => true,
+      clear: () => {},
+      draw: (ctx: CanvasRenderingContext2D, scale: number) => {
+        ctx.beginPath();
+        ctx.fillStyle = `rgba(255,255,255, ${0.5 + ((explosion.size / explosion.initSize) * 0.5)})`;
+        ctx.arc(
+          explosion.pos.x * scale,
+          explosion.pos.y * scale,
+          5 * scale * (explosion.initSize - explosion.size), 0, Math.PI*2
+        );
+        ctx.fill();
+      }
+    })))
+    );
   	requestAnimationFrame(renderLoop);
   };
 
@@ -178,7 +199,7 @@ const game = () => {
     spawnEnemy(i * 100, 150);
     spawnEnemy(i * 100 + 50, 250);
   }
-  spawnEnemy(500, 500, 50, 150);
+  spawnEnemy(500, 200, 50, 100);
 
   const bulletToCollisionKey = (bullet : BulletState) : string =>
     `${Math.floor(bullet.xPos / COLLISION_GRID_SIZE) * COLLISION_GRID_SIZE}-${Math.floor(bullet.yPos / COLLISION_GRID_SIZE) *  COLLISION_GRID_SIZE}`;
@@ -192,10 +213,11 @@ const game = () => {
       .map((bullet, bulletIdx) => ({
         enemies: (collisionGrid[bulletToCollisionKey(bullet)]||[])
           .filter((enemyIdx) => enemyCollidesWithBullet(bullet, enemies[enemyIdx])),
-        bulletIdx: bulletIdx
+        bulletIdx: bulletIdx,
+        collsionPos: { x: bullet.xPos, y: bullet.yPos }
       }))
-      .filter(({enemies, bulletIdx}) => bullets[bulletIdx].explosion < 0)
-      .forEach(enemiesReceiveBullet)
+      .filter(({enemies, bulletIdx}) => enemies.length > 0)
+      .forEach(handleBulletEnemyCollision)
 
     store.dispatch({type: ActionTypes.UPDATE});
   }
