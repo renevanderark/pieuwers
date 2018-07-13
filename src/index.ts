@@ -93,7 +93,7 @@ const handleBulletEnemyCollision = (params : {bulletIdx : number, enemies: Array
 const drawPieuwer = (img : HTMLImageElement, ps : PieuwerState) : Drawable =>
   (ctx: CanvasRenderingContext2D, scale: number) => {
     ctx.save();
-    ctx.translate(ps.xPos * scale, ps.yPos * scale);
+    ctx.translate(ps.pos.x * scale, ps.pos.y * scale);
     ctx.rotate(ps.angle * Math.PI / 180);
     ctx.drawImage(img, 0, 0, 240, 240, -120*scale, -120*scale, 240*scale, 240*scale);
     ctx.restore();
@@ -104,8 +104,8 @@ const drawBullet = (bs : BulletState) : Drawable =>
       ctx.beginPath();
       ctx.fillStyle = `rgb(255,255,255)`;
       ctx.arc(
-        bs.xPos * scale,
-        bs.yPos * scale,
+        bs.pos.x * scale,
+        bs.pos.y * scale,
         5 * scale, 0, Math.PI*2
       );
       ctx.fill();
@@ -116,8 +116,8 @@ const drawEnemy = (enemy : EnemyState) : Drawable =>
     ctx.beginPath();
     ctx.globalAlpha = (enemy.health / enemy.maxHealth) * 0.5 + 0.5;
     ctx.drawImage(enemyPng,0,0, 100, 160,
-      (enemy.xPos - enemy.collisionRadius) * scale,
-      (enemy.yPos - enemy.collisionRadius) * scale,
+      (enemy.pos.x - enemy.collisionRadius) * scale,
+      (enemy.pos.y - enemy.collisionRadius) * scale,
       100 * (enemy.collisionRadius / 50) * scale,
       160 * (enemy.collisionRadius / 50) * scale);
 
@@ -160,10 +160,10 @@ const game = () => {
   spawnEnemy(500, 200, 50, 100);
 
   const bulletToCollisionKey = (bullet : BulletState) : string =>
-    `${Math.floor(bullet.xPos / COLLISION_GRID_SIZE) * COLLISION_GRID_SIZE}-${Math.floor(bullet.yPos / COLLISION_GRID_SIZE) *  COLLISION_GRID_SIZE}`;
+    `${Math.floor(bullet.pos.x / COLLISION_GRID_SIZE) * COLLISION_GRID_SIZE}-${Math.floor(bullet.pos.y / COLLISION_GRID_SIZE) *  COLLISION_GRID_SIZE}`;
 
   const enemyCollidesWithBullet = (bullet : BulletState, enemy: EnemyState) : boolean =>
-    Math.sqrt(Math.pow(bullet.xPos - enemy.xPos, 2) + Math.pow(bullet.yPos - enemy.yPos, 2)) < enemy.collisionRadius;
+    Math.sqrt(Math.pow(bullet.pos.x - enemy.pos.x, 2) + Math.pow(bullet.pos.y - enemy.pos.y, 2)) < enemy.collisionRadius;
 
   const updateLoop = () => {
     const { bulletStates : { bullets }, enemyStates : { collisionGrid, enemies } } : GameState = store.getState();
@@ -172,7 +172,7 @@ const game = () => {
         enemies: (collisionGrid[bulletToCollisionKey(bullet)]||[])
           .filter((enemyIdx) => enemyCollidesWithBullet(bullet, enemies[enemyIdx])),
         bulletIdx: bulletIdx,
-        collsionPos: { x: bullet.xPos, y: bullet.yPos }
+        collsionPos: { x: bullet.pos.x, y: bullet.pos.y }
       }))
       .filter(({enemies, bulletIdx}) => enemies.length > 0)
       .forEach(handleBulletEnemyCollision)
