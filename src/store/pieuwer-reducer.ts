@@ -22,6 +22,8 @@ export enum PieuwerControl {
 
 
 export interface PieuwerState {
+  axisY: number
+  axisX: number
   accelerateUp: boolean
   accelerateDown: boolean
   accelerateLeft: boolean
@@ -54,6 +56,7 @@ const range = (start : number, end : number, step : number = 1) : Array<number> 
 
 
 const initializePieuwerState = (xPos : number) : PieuwerState => ({
+  axisX: null, axisY: null,
   accelerateLeft: false, accelerateRight: false,
   accelerateUp: false, accelerateDown: false,
   angle: 0, ySpeed: 0, shooting: false,
@@ -82,25 +85,33 @@ const initialState : MultiPieuwerState  = {
 
 const updatePieuwerState = (pieuwerState : PieuwerState) : PieuwerState => ({
     ...pieuwerState,
-    ySpeed: pieuwerState.accelerateUp
-      ? guardNumber(pieuwerState.ySpeed + yAcceleration, maxYSpeed, minYSpeed)
-      : pieuwerState.accelerateDown
-      ? guardNumber(pieuwerState.ySpeed - yAcceleration, maxYSpeed, minYSpeed)
-      : pieuwerState.ySpeed < 0
-      ? guardNumber(pieuwerState.ySpeed + yAcceleration, 0, minYSpeed)
-      : pieuwerState.ySpeed > 0
-      ? guardNumber(pieuwerState.ySpeed - yAcceleration, maxYSpeed, 0)
-      : 0,
+    ySpeed: pieuwerState.axisY !== null
+      ? pieuwerState.axisY === 0
+        ? 0
+        : guardNumber(pieuwerState.ySpeed + (yAcceleration * pieuwerState.axisY), maxYSpeed, minYSpeed)
+      : pieuwerState.accelerateUp
+        ? guardNumber(pieuwerState.ySpeed + yAcceleration, maxYSpeed, minYSpeed)
+        : pieuwerState.accelerateDown
+        ? guardNumber(pieuwerState.ySpeed - yAcceleration, maxYSpeed, minYSpeed)
+        : pieuwerState.ySpeed < 0
+        ? guardNumber(pieuwerState.ySpeed + yAcceleration, 0, minYSpeed)
+        : pieuwerState.ySpeed > 0
+        ? guardNumber(pieuwerState.ySpeed - yAcceleration, maxYSpeed, 0)
+        : 0,
 
-    angle: pieuwerState.accelerateLeft
-      ? guardNumber(pieuwerState.angle - turnAcceleration, maxAngle, minAngle)
-      : pieuwerState.accelerateRight
-      ? guardNumber(pieuwerState.angle + turnAcceleration, maxAngle, minAngle)
-      : pieuwerState.angle < 0
-      ? guardNumber(pieuwerState.angle + turnAcceleration, 0, minAngle)
-      : pieuwerState.angle > 0
-      ? guardNumber(pieuwerState.angle - turnAcceleration, maxAngle, 0)
-      : 0,
+    angle: pieuwerState.axisX !== null
+      ? pieuwerState.axisX === 0
+        ? 0
+        : guardNumber(pieuwerState.angle + (turnAcceleration * pieuwerState.axisX), maxAngle, minAngle)
+      : pieuwerState.accelerateLeft
+        ? guardNumber(pieuwerState.angle - turnAcceleration, maxAngle, minAngle)
+        : pieuwerState.accelerateRight
+        ? guardNumber(pieuwerState.angle + turnAcceleration, maxAngle, minAngle)
+        : pieuwerState.angle < 0
+        ? guardNumber(pieuwerState.angle + turnAcceleration, 0, minAngle)
+        : pieuwerState.angle > 0
+        ? guardNumber(pieuwerState.angle - turnAcceleration, maxAngle, 0)
+        : 0,
 
     pos: {
       y: guardNumber(Math.round(pieuwerState.pos.y - pieuwerState.ySpeed), VIRT_HEIGHT, 0),
@@ -121,7 +132,22 @@ export default function(state : MultiPieuwerState, action : KeyAction) {
     return initialState;
   }
   switch (action.type) {
-    case ActionTypes.KEYUP:
+    case ActionTypes.AXIS_X_CHANGE:
+      return {
+          ...state,
+          [action.player] : {
+            ...state[action.player],
+            axisX: action.axisForce
+          }
+      };
+    case ActionTypes.AXIS_Y_CHANGE:
+    return {
+        ...state,
+        [action.player] : {
+          ...state[action.player],
+          axisY: action.axisForce
+        }
+    };    case ActionTypes.KEYUP:
       switch (action.key) {
         case PieuwerControl.UP:
           return setPieuwerState(state, action.player, "accelerateUp", false);

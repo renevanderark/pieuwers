@@ -43,8 +43,9 @@ const GamepadToPieuwerControlMap : {[key: string]: PieuwerControl} = {
 
 export interface KeyAction  {
   type: ActionTypes
-  key: PieuwerControl
+  key?: PieuwerControl
   player: PieuwerKey
+  axisForce?: number
 }
 
 export interface BulletAction {
@@ -72,6 +73,7 @@ const makeEnemy = (xPos : number, yPos : number, size: Point, health? : number) 
   accelerateLeft: false, accelerateRight: false,
   accelerateUp: false, accelerateDown: false,
   angle: 0, ySpeed: 0, shooting: false,
+  axisX: null, axisY: null,
   size: size,
   collisionShapes: [
     {

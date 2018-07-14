@@ -28,6 +28,7 @@ if (!(mainLayer instanceof HTMLCanvasElement)) { throw new TypeError("wrong elem
 const mainLayerCtx = mainLayer.getContext("2d");
 const mainFrameRenderer = getFrameRenderer(mainLayerCtx, mainLayer);
 
+const debug = document.getElementById("debug");
 
 let gamePadToPlayerMap : {[key : string] : "pieuwerOne"|"pieuwerTwo"} = {
   "0": "pieuwerOne", "1": "pieuwerTwo"
@@ -48,27 +49,19 @@ eventListeners.add("keyup", (ev : KeyboardEvent) => { onKeyUp(ev.key); });
 
 ['r', 'l'].forEach(k => {
   eventListeners.add(`gamepad-${k}-axis-x-change`, (ev : CustomEvent) =>  {
-    if(ev.detail.rounded > 0) {
-      onGamePadButtonDown('right', gamePadToPlayerMap[ev.detail.controllerIndex]);
-    } else if (ev.detail.rounded < 0) {
-      onGamePadButtonDown('left', gamePadToPlayerMap[ev.detail.controllerIndex]);
-    } else {
-      onGamePadButtonUp('left', gamePadToPlayerMap[ev.detail.controllerIndex]);
-      onGamePadButtonUp('right', gamePadToPlayerMap[ev.detail.controllerIndex]);
-    }
+    store.dispatch({type: ActionTypes.AXIS_X_CHANGE,
+      player: gamePadToPlayerMap[ev.detail.controllerIndex],
+      axisForce: Math.round(ev.detail.rounded * 0.01)
+    });
   });
 });
 
 ['r', 'l'].forEach(k => {
   eventListeners.add(`gamepad-${k}-axis-y-change`, (ev : CustomEvent) =>  {
-    if(ev.detail.rounded > 0) {
-      onGamePadButtonDown('down', gamePadToPlayerMap[ev.detail.controllerIndex]);
-    } else if (ev.detail.rounded < 0) {
-      onGamePadButtonDown('up', gamePadToPlayerMap[ev.detail.controllerIndex]);
-    } else {
-      onGamePadButtonUp('up', gamePadToPlayerMap[ev.detail.controllerIndex]);
-      onGamePadButtonUp('down', gamePadToPlayerMap[ev.detail.controllerIndex]);
-    }
+    store.dispatch({type: ActionTypes.AXIS_Y_CHANGE,
+      player: gamePadToPlayerMap[ev.detail.controllerIndex],
+      axisForce: -Math.round(ev.detail.rounded * 0.01)
+    });
   });
 });
 
@@ -77,7 +70,7 @@ initViewPort(VIRT_WIDTH, VIRT_HEIGHT, getResizeListeners([mainLayer],
   mainFrameRenderer.onResize
 ));
 
-const debug = document.getElementById("debug");
+
 
 const handleBulletEnemyCollision = (params : {bulletIdx : number, enemies: Array<number>, collsionPos : Point}) => {
   enemiesReceiveBullet(params);
@@ -87,7 +80,6 @@ const handleBulletEnemyCollision = (params : {bulletIdx : number, enemies: Array
 const game = () => {
   const renderLoop = () => {
     const { pieuwerStates, bulletStates, enemyStates, explosionStates } = store.getState();
-  //  debug.innerHTML = JSON.stringify(store.getState().enemyStates.collisionGrid, null, 2);
 
     mainFrameRenderer.clear();
     mainFrameRenderer.render([
