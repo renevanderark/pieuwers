@@ -82,6 +82,7 @@ const initialState : MultiPieuwerState  = {
   pieuwerOne: initializePieuwerState(200),
   pieuwerTwo: initializePieuwerState(VIRT_WIDTH - 200)
 };
+console.log(initialState.pieuwerOne.collisionShapes);
 
 const updatePieuwerState = (pieuwerState : PieuwerState) : PieuwerState => ({
     ...pieuwerState,

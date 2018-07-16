@@ -3,7 +3,7 @@ import { GameState } from "../store/reducers";
 import { EnemyState } from "../store/enemy-reducer";
 import { Point, Box, Circle, isBox } from "./shapes";
 import { pointWithinBox } from "./boxes";
-import { translateToOrigin, rotateAroundOrigin} from "./points";
+import { translateToOrigin, rotateAroundOrigin} from "./shape-ops";
 
 const pointWithinCircle = (pos : Point, c : Circle) : boolean =>
   Math.sqrt(Math.pow(pos.x - c.x, 2) + Math.pow(pos.y - c.y, 2)) <= c.radius;
