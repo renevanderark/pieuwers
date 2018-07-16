@@ -3,7 +3,7 @@ import { Drawable } from "./resizable-canvas/drawable";
 import { PieuwerState, PieuwerKey } from "./store/pieuwer-reducer";
 import { EnemyState } from "./store/enemy-reducer";
 import { ExplosionState } from "./store/explosion-reducer";
-import { isBox, Box, Circle, Point } from "./phyz/shapes";
+import { isBox, Box, Circle, Point, getBoundingBox } from "./phyz/shapes";
 import { ENEMY_WIDTH, ENEMY_HEIGHT, PIEUWER_WIDTH, PIEUWER_HEIGHT } from "./store/constants";
 import { rotateBoxAroundOrigin, translateToOrigin, rotateAroundOrigin } from "./phyz/shape-ops";
 
@@ -28,23 +28,26 @@ export function preload(callback : () => void) {
   }
 }
 
+const drawBox = (shape : Box, ctx: CanvasRenderingContext2D, scale: number, pos : Point, angle : number, strokeStyle = "white") => {
+  const newBox = rotateBoxAroundOrigin(shape, (angle+180) * Math.PI / 180);
+  ctx.strokeStyle = strokeStyle;
+  ctx.beginPath();
+  newBox.forEach((p,i) => {
+    const tl = translateToOrigin(pos, p);
+    if (i === 0) {
+      ctx.moveTo(tl.x * scale, tl.y * scale);
+    } else {
+      ctx.lineTo(tl.x * scale, tl.y * scale);
+    }
+  });
+  ctx.closePath();
+  ctx.stroke();
+}
+
 const drawCollisionShapes = (ctx: CanvasRenderingContext2D, scale: number, collisionShapes : Array<Circle|Box>, pos : Point, angle : number) => {
-  ctx.fillStyle = "white";
-  ctx.strokeStyle = "white";
   collisionShapes.forEach(shape => {
     if (isBox(shape)) {
-      const newBox = rotateBoxAroundOrigin(<Box>shape, (angle+180) * Math.PI / 180);
-      ctx.beginPath();
-      newBox.forEach((p,i) => {
-        const tl = translateToOrigin(pos, p);
-        if (i === 0) {
-          ctx.moveTo(tl.x * scale, tl.y * scale);
-        } else {
-          ctx.lineTo(tl.x * scale, tl.y * scale);
-        }
-      });
-      ctx.closePath();
-      ctx.stroke();
+      drawBox(<Box>shape, ctx, scale, pos, angle);
     } else {
       const tl = translateToOrigin(pos, rotateAroundOrigin(shape, (angle+180) * Math.PI / 180));
       ctx.beginPath();
@@ -52,7 +55,6 @@ const drawCollisionShapes = (ctx: CanvasRenderingContext2D, scale: number, colli
       ctx.stroke();
     }
   });
-
 }
 
 export const drawPieuwer = (pieuwerKey : PieuwerKey, ps : PieuwerState) : Drawable =>
@@ -61,12 +63,12 @@ export const drawPieuwer = (pieuwerKey : PieuwerKey, ps : PieuwerState) : Drawab
     ctx.translate(ps.pos.x * scale, ps.pos.y * scale);
     ctx.rotate(ps.angle * Math.PI / 180);
     ctx.drawImage(pieuwerPngs[pieuwerKey], 0, 0,
-      PIEUWER_WIDTH, PIEUWER_HEIGHT,
-      -(PIEUWER_WIDTH/2)*scale, -(PIEUWER_HEIGHT / 2)*scale,
-      PIEUWER_WIDTH*scale, PIEUWER_HEIGHT*scale);
+      ps.size.x, ps.size.y,
+      -(ps.size.x / 2)*scale, -(ps.size.y / 2)*scale,
+      ps.size.x * scale, ps.size.y * scale);
     ctx.restore();
     drawCollisionShapes(ctx, scale, ps.collisionShapes, ps.pos, ps.angle);
-
+    drawBox(getBoundingBox(ps), ctx, scale, ps.pos, ps.angle, ps.collided ? "red" : "rgb(128,128,255)");
   };
 
 export const drawBullet = (bs : BulletState) : Drawable =>
@@ -95,6 +97,7 @@ export const drawEnemy = (enemy : EnemyState) : Drawable =>
       enemy.size.y * scale);
     ctx.restore();
     drawCollisionShapes(ctx, scale, enemy.collisionShapes, enemy.pos, enemy.angle);
+    drawBox(getBoundingBox(enemy), ctx, scale, enemy.pos, enemy.angle, enemy.collided ? "red" : "rgb(128,128,255)");
   };
 
 export const drawExplosion = (explosion : ExplosionState) =>

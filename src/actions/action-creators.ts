@@ -100,7 +100,8 @@ const makeEnemy = (xPos : number, yPos : number, size: Point, health? : number) 
     }
   ],
   health: health || 4, maxHealth: health || 4,
-  pos: {y: yPos, x: xPos}
+  pos: {y: yPos, x: xPos},
+  collided: false
 });
 
 export const enemyActionCreator = (dispatch : Dispatch<EnemyAction|BulletAction>) => ({

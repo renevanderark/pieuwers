@@ -14,7 +14,8 @@ import { keyActionCreator, bulletActionCreator, enemyActionCreator, explosionAct
 import { ActionTypes } from './actions/action-types';
 
 import { Point } from './phyz/shapes';
-import { detectBulletToEnemyCollisions } from './phyz/collisions';
+import { detectBulletToEnemyCollisions, detectPieuwerToEnemyCollisions } from './phyz/collisions';
+import { PieuwerKey } from './store/pieuwer-reducer';
 
 const store = createStore(combineReducers(reducers));
 
@@ -77,6 +78,13 @@ const handleBulletEnemyCollision = (params : {bulletIdx : number, enemies: Array
   spawnExplosion(params.collsionPos, 5)
 }
 
+const handlePieuwerToEnemyCollisions : (p : {pieuwers : Array<PieuwerKey>, enemies : Array<number>}) => void =
+  ({pieuwers, enemies}) => {
+    pieuwers.forEach(pieuwerKey => store.dispatch({type: ActionTypes.PIEUWER_COLLIDES, player: pieuwerKey}));
+    enemies.forEach(enemyIdx => store.dispatch({type: ActionTypes.ENEMY_COLLIDES_WITH_PIEUWER, enemyIdx: enemyIdx}));
+
+  }
+
 const game = () => {
   const renderLoop = () => {
     const { pieuwerStates, bulletStates, enemyStates, explosionStates } = store.getState();
@@ -103,13 +111,17 @@ const game = () => {
   spawnEnemy(1000, 200, {x: 200, y: 320}, 100);
 
   const updateLoop = () => {
-    detectBulletToEnemyCollisions(store.getState())
-      .forEach(handleBulletEnemyCollision)
+
 
     store.dispatch({type: ActionTypes.UPDATE});
+    detectBulletToEnemyCollisions(store.getState())
+      .forEach(handleBulletEnemyCollision);
+    handlePieuwerToEnemyCollisions(detectPieuwerToEnemyCollisions(store.getState()));
+
   }
 
   window.setInterval(updateLoop, 10);
+
   window.setInterval(() => {
     const { pieuwerOne, pieuwerTwo } = store.getState().pieuwerStates;
     spawnBullet(pieuwerOne);

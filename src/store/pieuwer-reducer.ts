@@ -35,6 +35,7 @@ export interface PieuwerState {
   size: Point
   shooting: boolean
   health: number
+  collided: boolean
 }
 
 export interface MultiPieuwerState {
@@ -75,7 +76,8 @@ const initializePieuwerState = (xPos : number) : PieuwerState => ({
     h: 80 - x*1.1
   }))),
   pos: {x: xPos, y: VIRT_HEIGHT - 150},
-  size: {x: 240, y: 240}
+  size: {x: PIEUWER_WIDTH, y: PIEUWER_HEIGHT},
+  collided: false
 });
 
 const initialState : MultiPieuwerState  = {
@@ -86,6 +88,7 @@ console.log(initialState.pieuwerOne.collisionShapes);
 
 const updatePieuwerState = (pieuwerState : PieuwerState) : PieuwerState => ({
     ...pieuwerState,
+    collided: false,
     ySpeed: pieuwerState.axisY !== null
       ? pieuwerState.axisY === 0
         ? 0
@@ -142,13 +145,14 @@ export default function(state : MultiPieuwerState, action : KeyAction) {
           }
       };
     case ActionTypes.AXIS_Y_CHANGE:
-    return {
-        ...state,
-        [action.player] : {
-          ...state[action.player],
-          axisY: action.axisForce
-        }
-    };    case ActionTypes.KEYUP:
+      return {
+          ...state,
+          [action.player] : {
+            ...state[action.player],
+            axisY: action.axisForce
+          }
+      };
+    case ActionTypes.KEYUP:
       switch (action.key) {
         case PieuwerControl.UP:
           return setPieuwerState(state, action.player, "accelerateUp", false);
@@ -179,6 +183,15 @@ export default function(state : MultiPieuwerState, action : KeyAction) {
         default:
           return state;
       }
+
+    case ActionTypes.PIEUWER_COLLIDES:
+      return {
+          ...state,
+          [action.player] : {
+            ...state[action.player],
+            collided: true
+          }
+      };
     case ActionTypes.UPDATE:
       return {
         pieuwerOne: updatePieuwerState(state.pieuwerOne),
