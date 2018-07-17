@@ -76,7 +76,7 @@ initViewPort(VIRT_WIDTH, VIRT_HEIGHT, getResizeListeners([mainLayer],
 
 const handleBulletEnemyCollision = (params : {bulletIdx : number, enemies: Array<number>, collsionPos : Point}) => {
   enemiesReceiveBullet(params);
-  spawnExplosion(params.collsionPos, 5)
+  spawnExplosion(params.collsionPos, 8);
 }
 
 const handlePieuwerToEnemyCollisions = (collisions : PieuwerToEnemyCollisions) => {

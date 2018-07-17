@@ -82,7 +82,7 @@ const makeEnemy = (type : EnemyType, xPos : number, yPos : number, size: Point, 
   angle: 0, ySpeed: 0, shooting: false,
   axisX: null, axisY: null,
   size: size,
-  collisionShapes: type === EnemyType.SKULL_BOSS ? [
+  collisionShapes: type === EnemyType.SKULL_BOSS || type === EnemyType.SKULL ? [
     {
       x: (4 -  (ENEMY_WIDTH  / 2)) * (size.x / ENEMY_WIDTH),
       y: (63 - (ENEMY_HEIGHT / 2)) * (size.y / ENEMY_HEIGHT),
@@ -105,7 +105,7 @@ const makeEnemy = (type : EnemyType, xPos : number, yPos : number, size: Point, 
       y: (50 - (ENEMY_HEIGHT / 2)) * (size.y / ENEMY_HEIGHT),
       radius: 20 * (size.x / ENEMY_WIDTH)
     }
-  ] : [
+  ] : [ // FIXME: =not scaled to any other width than: 400!!!
     {x:-5,y:-55,radius: 65},
     {x:-74,y:-55,w: 135,h:150},
     {x:-165,y:58,w: 315,h:50},
