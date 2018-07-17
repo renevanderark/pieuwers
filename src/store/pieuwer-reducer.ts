@@ -6,12 +6,12 @@ import { Point, Box, Circle } from "../phyz/shapes";
 import { guardNumber } from "../phyz/guard-number";
 
 const yAcceleration = 0.25;
-const maxYSpeed = 3;
-const minYSpeed = -1.5;
+const maxYSpeed = 5;
+const minYSpeed = -3;
 
 const turnAcceleration = 1.5;
-const maxAngle = 15;
-const minAngle = -15;
+const maxAngle = 25;
+const minAngle = -25;
 
 type stateKey = "accelerateUp"|"accelerateDown"|"accelerateLeft"|"accelerateRight"|"shooting";
 export type PieuwerKey = "pieuwerOne"|"pieuwerTwo";
@@ -41,6 +41,7 @@ export interface PieuwerState {
 export interface MultiPieuwerState {
   pieuwerOne: PieuwerState
   pieuwerTwo: PieuwerState
+  [key: string]: PieuwerState
 }
 const range = (start : number, end : number, step : number = 1) : Array<number> => {
     var range = [];

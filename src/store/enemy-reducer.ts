@@ -22,7 +22,7 @@ const initialState : MultiEnemyState =  {
 const fly = (enemyState : EnemyState) : EnemyState => ({
   ...enemyState,
   collided: false,
-  angle: enemyState.angle + 0.1 >= 360 ? 0 : enemyState.angle + 0.1
+  angle: enemyState.angle + 0.2 >= 360 ? 0 : enemyState.angle + 0.2
 });
 
 export default function(state : MultiEnemyState, action : EnemyAction) : MultiEnemyState {

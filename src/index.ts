@@ -5,7 +5,7 @@ import getFrameRenderer from "./resizable-canvas/frame-renderer";
 import getResizeListeners from "./resizable-canvas/resize-listeners";
 import initViewPort from "./resizable-canvas/viewport";
 import getEventListeners from './resizable-canvas/event-listeners';
-import { preload, drawPieuwer, drawBullet, drawEnemy, drawExplosion } from './draw';
+import { preload, drawPieuwer, drawBullet, drawEnemy, drawExplosion, drawCollisions } from './draw';
 
 import reducers from './store/reducers';
 import { VIRT_HEIGHT, VIRT_WIDTH } from './store/constants';
@@ -85,20 +85,31 @@ const handlePieuwerToEnemyCollisions = (collisions : PieuwerToEnemyCollisions) =
   Object.keys(collisions).filter(pieuwerKey => collisions[pieuwerKey].length > 0)
     .map(pk => collisions[pk]).reduce((a,b) => a.concat(b), [])
     .forEach(({enemyIdx}) => store.dispatch({type: ActionTypes.ENEMY_COLLIDES_WITH_PIEUWER, enemyIdx: enemyIdx}));
+
+  if (Object.keys(collisions).filter(pieuwerKey => collisions[pieuwerKey].length > 0).length > 0) {
+    store.dispatch({type: ActionTypes.SET_COLLISIONS, collisions: collisions});
+  }
 };
 
 const game = () => {
   const renderLoop = () => {
-    const { pieuwerStates, bulletStates, enemyStates, explosionStates } = store.getState();
+    const { pieuwerStates, bulletStates, enemyStates, explosionStates, collisionStates } = store.getState();
+    debug.innerHTML =  ""; //JSON.stringify(collisionStates, null, 2);
 
     mainFrameRenderer.clear();
-    mainFrameRenderer.render([
-        drawPieuwer("pieuwerOne", pieuwerStates.pieuwerOne),
-        drawPieuwer("pieuwerTwo", pieuwerStates.pieuwerTwo),
-      ].concat(
-      bulletStates.bullets.map(drawBullet)).concat(
+    mainFrameRenderer.render(
+      bulletStates.bullets.map(drawBullet).concat(
       explosionStates.explosions.map(drawExplosion)).concat(
-      enemyStates.enemies.map(drawEnemy)
+      enemyStates.enemies.map(drawEnemy).concat(
+      [
+            drawPieuwer("pieuwerOne", pieuwerStates.pieuwerOne),
+            drawPieuwer("pieuwerTwo", pieuwerStates.pieuwerTwo),
+      ]).concat(
+      Object.keys(collisionStates.collisions).map(piewerKey => drawCollisions(pieuwerStates[piewerKey],
+        collisionStates.collisions[piewerKey].map(c => c.collisions.collidingCorners)))).concat(
+      Object.keys(collisionStates.collisions).map(pk => collisionStates.collisions[pk]).reduce((a,b) => a.concat(b), [])
+        .map(({enemyIdx, collisions}) => drawCollisions(enemyStates.enemies[enemyIdx], [collisions.collidingEnemyCorners]))
+      )
     ));
   	requestAnimationFrame(renderLoop);
   };
@@ -120,7 +131,6 @@ const game = () => {
     detectBulletToEnemyCollisions(store.getState())
       .forEach(handleBulletEnemyCollision);
     handlePieuwerToEnemyCollisions(detectPieuwerToEnemyCollisions(store.getState()));
-
   }
 
   window.setInterval(updateLoop, 10);

@@ -4,6 +4,7 @@ import { PieuwerControl, PieuwerKey, PieuwerState } from "../store/pieuwer-reduc
 import { EnemyState } from "../store/enemy-reducer";
 import { Point } from "../phyz/shapes";
 import { ENEMY_WIDTH, ENEMY_HEIGHT } from "../store/constants";
+import { PieuwerToEnemyCollisions } from "../phyz/collisions";
 
 
 
@@ -66,6 +67,11 @@ export interface ExplosionAction {
   type: ActionTypes,
   pos: Point
   size: number
+}
+
+export interface CollisionAction {
+  type: ActionTypes
+  collisions: PieuwerToEnemyCollisions
 }
 
 
