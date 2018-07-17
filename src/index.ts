@@ -122,8 +122,8 @@ const game = () => {
   for (let i = 0; i < 16; i++) {
     setTimeout(() => spawnEnemy(EnemyType.SKULL, -100, -100, {x: 60, y: 80}, 30), i * 500);
   }
-  setTimeout(() => spawnEnemy(EnemyType.SKULL_BOSS, VIRT_WIDTH / 2, VIRT_HEIGHT / 2, {x: 400, y: 640}, 300), 8000);
-  setTimeout(() => spawnEnemy(EnemyType.SKULL_BOSS, VIRT_WIDTH / 2, VIRT_HEIGHT / 2, {x: 400, y: 640}, 300), 12000);
+  setTimeout(() => spawnEnemy(EnemyType.SKULL_BOSS, VIRT_WIDTH / 2, VIRT_HEIGHT / 2, {x: 400, y: 640}, 150), 8000);
+  setTimeout(() => spawnEnemy(EnemyType.SKULL_BOSS, VIRT_WIDTH / 2, VIRT_HEIGHT / 2, {x: 400, y: 640}, 150), 12000);
 
   let uploopinterval : number, bulletInterval : number;
   const updateLoop = () => {
