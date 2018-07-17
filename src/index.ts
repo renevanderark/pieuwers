@@ -142,6 +142,14 @@ const game = () => {
       document.body.innerHTML = `<div style="color: white; text-align: center">BOEM! GAME OVER</div>`;
       setTimeout(() => location.reload(), 3000);
     }
+    if (store.getState().enemyStates.enemies.length === 0) {
+      mainLayer.style.opacity = "0";
+      gameOver = true;
+      clearInterval(uploopinterval);
+      clearInterval(bulletInterval);
+      document.body.innerHTML = `<div style="color: white; font-size: 5em; text-align: center">jA!</div>`;
+      setTimeout(() => location.reload(), 3000);
+    }
   }
   uploopinterval = window.setInterval(updateLoop, 10);
 
@@ -154,4 +162,4 @@ const game = () => {
   renderLoop();
 };
 
-preload(game);
+preload(() => setTimeout(game, 10));
