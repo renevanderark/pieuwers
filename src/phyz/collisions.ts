@@ -82,89 +82,75 @@ const circleCollidesWithBox = (c : Circle, b : Box) =>
   pointWithinBox({x: c.x + Math.cos(270 * (Math.PI / 180)) * c.radius, y: c.y + Math.sin(270 * (Math.PI / 180)) * c.radius}, b)
 
 
-interface ShapeCollisions {
+export type CollisionList = Array<{shapeIndex: number, collidingCorners: Array<number>}>;
+
+export interface ShapeCollisions {
   collides: boolean
-  collidingCorners: Array<{shapeIndex: number, collidingCorners: Array<number>}>
-  //collidingEnemyCorners: Array<{shapeIndex: number, collidingCorners: Array<number>}>
+  collidingCorners: CollisionList
+  collidingEnemyCorners: CollisionList
 }
 
+const getCollidingCorners = <T extends PieuwerState>(thing1 : T, thing2 : T) : Array<Array<boolean>> =>
+  thing1.collisionShapes.map(shape => {
+    if (isBox(shape)) {
+      return rotateBoxAroundOrigin(<Box>shape, (thing1.angle+180) * Math.PI / 180)
+        .map(point => translateToOrigin(thing1.pos, point))
+        .map(point =>
+          pointWithinAreaList(
+            rotateAroundOrigin(translateToOrigin(point, thing2.pos), -thing2.angle * Math.PI / 180), thing2.collisionShapes))
+    } else {
+      const testCircle = {
+              ...rotateAroundOrigin(translateToOrigin(translateToOrigin(thing1.pos, rotateAroundOrigin(shape, (thing1.angle+180) * Math.PI / 180)), thing2.pos), -thing2.angle * (Math.PI / 180)),
+              radius: (<Circle>shape).radius
+            };
+      return [thing2.collisionShapes.map(thing2Shape => {
+        if (isBox(thing2Shape)) {
+          return circleCollidesWithBox(
+            testCircle,
+            <Box>thing2Shape
+          )
+        } else {
+          return circleCollidesWithCircle(
+              testCircle,
+              <Circle>thing2Shape,
+          );
+        }
+      }).indexOf(true) > -1]
+    }
+  });
+
+const mapCollidingCorners = (collidingCorners : Array<Array<boolean>>) : CollisionList =>
+  collidingCorners.map((corners, shapeIndex) => ({
+      shapeIndex: shapeIndex,
+      collidingCorners: corners.map((c, idx) => ({collides: c, idx: idx}))
+      .filter(({collides, idx}) => collides).map(({idx}) => idx)
+    }))
+    .filter(({collidingCorners}) => collidingCorners.length > 0)
+
 const getShapeCollisions = (enemy : EnemyState, pieuwer : PieuwerState) : ShapeCollisions => {
-  const collidingCorners = pieuwer.collisionShapes.map(shape => {
-    if (isBox(shape)) {
-      return rotateBoxAroundOrigin(<Box>shape, (pieuwer.angle+180) * Math.PI / 180)
-        .map(point => translateToOrigin(pieuwer.pos, point))
-        .map(point =>
-          pointWithinAreaList(
-            rotateAroundOrigin(translateToOrigin(point, enemy.pos), -enemy.angle * Math.PI / 180), enemy.collisionShapes))
-    } else {
-      const testCircle = {
-              ...rotateAroundOrigin(translateToOrigin(translateToOrigin(pieuwer.pos, rotateAroundOrigin(shape, (pieuwer.angle+180) * Math.PI / 180)), enemy.pos), -enemy.angle * (Math.PI / 180)),
-              radius: (<Circle>shape).radius
-            };
-      return [enemy.collisionShapes.map(enemyShape => {
-        if (isBox(enemyShape)) {
-          return circleCollidesWithBox(
-            testCircle,
-            <Box>enemyShape
-          )
-        } else {
-          return circleCollidesWithCircle(
-              testCircle,
-              <Circle>enemyShape,
-          );
-        }
-      }).indexOf(true) > -1]
-    }
-  });
-
-  const collidingEnemyCorners = enemy.collisionShapes.map(shape => {
-    if (isBox(shape)) {
-      return rotateBoxAroundOrigin(<Box>shape, (enemy.angle+180) * Math.PI / 180)
-        .map(point => translateToOrigin(enemy.pos, point))
-        .map(point =>
-          pointWithinAreaList(
-            rotateAroundOrigin(translateToOrigin(point, pieuwer.pos), -pieuwer.angle * Math.PI / 180), pieuwer.collisionShapes))
-    } else {
-      const testCircle = {
-              ...rotateAroundOrigin(translateToOrigin(translateToOrigin(enemy.pos, rotateAroundOrigin(shape, (enemy.angle+180) * Math.PI / 180)), pieuwer.pos), -pieuwer.angle * (Math.PI / 180)),
-              radius: (<Circle>shape).radius
-            };
-      return [pieuwer.collisionShapes.map(pieuwerShape => {
-        if (isBox(pieuwerShape)) {
-          return circleCollidesWithBox(
-            testCircle,
-            <Box>pieuwerShape
-          )
-        } else {
-          return circleCollidesWithCircle(
-              testCircle,
-              <Circle>pieuwerShape,
-          );
-        }
-      }).indexOf(true) > -1]
-    }
-  });
-
-  document.getElementById("debug").innerHTML += JSON.stringify(collidingEnemyCorners, null, 2);
-
+  const collidingCorners = getCollidingCorners(pieuwer, enemy);
+  const collidingEnemyCorners = getCollidingCorners(enemy, pieuwer);
   const collides = collidingCorners.concat(collidingEnemyCorners)
     .reduce((a,b) => a.concat(b), []).indexOf(true) > -1
+
   return {
     collides: collides,
     collidingCorners: collides
-      ? collidingCorners.map((corners, shapeIndex) => ({
-          shapeIndex: shapeIndex,
-          collidingCorners: corners.map((c, idx) => ({collides: c, idx: idx})).filter(({collides, idx}) => collides).map(({idx}) => idx)
-        })).filter(({collidingCorners}) => collidingCorners.length > 0)
-      : []
+      ? mapCollidingCorners(collidingCorners)
+      : [],
+    collidingEnemyCorners: collides
+      ? mapCollidingCorners(collidingEnemyCorners)
+      : [],
   };
 };
 
-export const detectPieuwerToEnemyCollisions : (s : GameState) => {pieuwers: Array<string>, enemies: Array<number>}  =
-  ({ pieuwerStates : { pieuwerOne, pieuwerTwo }, enemyStates : { enemies } }) => {
+export interface PieuwerToEnemyCollisions {
+  [key: string]: Array<{enemyIdx : number, collisions: ShapeCollisions}>
+}
 
-    document.getElementById("debug").innerHTML = "";
-    const collisions : {[key: string]: Array<{enemyIdx : number, collisions: ShapeCollisions}>} = {
+export const detectPieuwerToEnemyCollisions : (s : GameState) => PieuwerToEnemyCollisions =
+  ({ pieuwerStates : { pieuwerOne, pieuwerTwo }, enemyStates : { enemies } }) => {
+    return {
       "pieuwerOne": getBoundingBoxCollisionsForPieuwer(pieuwerOne, enemies)
         .map(enemyIdx => ({
           collisions: getShapeCollisions(enemies[enemyIdx], pieuwerOne),
@@ -178,75 +164,4 @@ export const detectPieuwerToEnemyCollisions : (s : GameState) => {pieuwers: Arra
         }))
         .filter(({collisions}) => collisions.collides),
     };
-
-    //document.getElementById("debug").innerHTML = JSON.stringify(collisions, null, 2);
-/*      results.map((corners, shapeIndex) => ({
-        shapeIndex: shapeIndex,
-        collidingCorners: corners.map((c, idx) => ({collides: c, idx: idx})).filter(({collides, idx}) => collides).map(({idx}) => idx)
-      })).filter(({collidingCorners}) => collidingCorners.length > 0)
-    );*/
-
-
-//      .map(point => translateToOrigin(enemies[0].pos, point))
-//      .map(point => pointWithinBox(point, getBoundingBox(enemies[0])));
-
-/*    const newBox1 = rotateBoxAroundOrigin(getBoundingBox(enemies[0]), enemies[0].angle * Math.PI / 180)
-      .map(point => translateToOrigin(point, enemies[0].pos));*/
-
-
-    //document.getElementById("debug").innerHTML = JSON.stringify(collisions);
-    //document.getElementById("debug").innerHTML +=  "\n" + JSON.stringify(debug);
-    //document.getElementById("debug").innerHTML += "\n" + JSON.stringify(enemies[0].pos);
-
-    return {
-      pieuwers: Object.keys(collisions).filter(pieuwerKey => collisions[pieuwerKey].length > 0),
-      enemies: collisions.pieuwerOne.map(({enemyIdx}) => enemyIdx).concat(
-        collisions.pieuwerTwo.map(({enemyIdx}) => enemyIdx)).filter((val, idx, self) => self.indexOf(val) === idx)
-    };
-    /// FIRST: do the boxes collide?
-    // 1) rotate pieuwer bounding box around origin
-    // 2) translate pieuwer bounding box to pieuwer position
-    // 3) rotate pieuwer bounding box around enemy origin (to enemy-ang=0)
-    // 4) are any points from rotated pieuwerBox within enemy bounding box? (CONCAT WITH NEXT)
-    // 5) rotate enemy box to (pieuwerAng=0)
-    // 4) are any points from rotated enemy box within pieuwer bounding box? (FILTER)
-
-
-
-    // --> TODO when these steps??
-    // 1) rotate pieuwer collision shapes around origin
-    // 2) translate pieuwer collision shapes to pieuwer position
-    // 3) rotate each collision shape around enemy origin --> same as with bullets
-    // FIXME! 4) do any pieuwer collision shapes 'overlap with the enemy bounding box? (FILTER)
-    // 5) do any pieuwer collision shapes 'overlap with any of the enmey collision shapes? (CONCAT WITH NEXT)
-    // 6) rotate each enemy collisionShape around pieuwer origin
-    // 7) do any pieuwer collision shapes 'overlap with any of the enmey collision shapes? (FILTER)
-    // ') overlap is: ... (any points within box?)
-/*
-  ctx.fillStyle = "white";
-  ctx.strokeStyle = "white";
-  collisionShapes.forEach(shape => {
-    if (isBox(shape)) {
-      const newBox = rotateBoxAroundOrigin(<Box>shape, (angle+180) * Math.PI / 180);
-      ctx.beginPath();
-      newBox.forEach((p,i) => {
-        const tl = translateToOrigin(pos, p);
-        if (i === 0) {
-          ctx.moveTo(tl.x * scale, tl.y * scale);
-        } else {
-          ctx.lineTo(tl.x * scale, tl.y * scale);
-        }
-      });
-      ctx.closePath();
-      ctx.stroke();
-    } else {
-      const tl = translateToOrigin(pos, rotateAroundOrigin(shape, (angle+180) * Math.PI / 180));
-      ctx.beginPath();
-      ctx.arc(tl.x * scale, tl.y * scale, (<Circle>shape).radius * scale, 0, Math.PI*2);
-      ctx.stroke();
-    }
-  });
-}
-*/
-
 }
