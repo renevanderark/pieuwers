@@ -62,7 +62,7 @@ const initializePieuwerState = (xPos : number, collisionShapes : Array<Box|Circl
   accelerateLeft: false, accelerateRight: false,
   accelerateUp: false, accelerateDown: false,
   angle: 0, ySpeed: 0, shooting: false,
-  health: 100,
+  health: 500,
   collisionShapes: collisionShapes,
   pos: {x: xPos, y: VIRT_HEIGHT - 150},
   size: {x: PIEUWER_WIDTH, y: PIEUWER_HEIGHT},
@@ -97,7 +97,7 @@ const initialState : MultiPieuwerState  = {
     h: 140- x*1.6
   }))).concat([
     {x: -80, y: 65, w: 80, h: 15},
-    {x: -70, y: 100, w: 70, h: 10},    
+    {x: -70, y: 100, w: 70, h: 10},
     {x: 0, y: 50, w: 85, h: 20},
     {x: 0, y: 70, w: 60, h: 20},
     {x: 0, y: 90, w: 85, h: 20},
@@ -209,7 +209,8 @@ export default function(state : MultiPieuwerState, action : KeyAction) {
           ...state,
           [action.player] : {
             ...state[action.player],
-            collided: true
+            collided: true,
+            health: state[action.player].health - 1
           }
       };
     case ActionTypes.UPDATE:

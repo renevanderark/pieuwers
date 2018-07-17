@@ -1,7 +1,7 @@
 import { Dispatch, AnyAction } from "redux";
 import { ActionTypes } from "./action-types";
 import { PieuwerControl, PieuwerKey, PieuwerState } from "../store/pieuwer-reducer";
-import { EnemyState } from "../store/enemy-reducer";
+import { EnemyState, EnemyType } from "../store/enemy-reducer";
 import { Point } from "../phyz/shapes";
 import { ENEMY_WIDTH, ENEMY_HEIGHT } from "../store/constants";
 import { PieuwerToEnemyCollisions } from "../phyz/collisions";
@@ -75,7 +75,8 @@ export interface CollisionAction {
 }
 
 
-const makeEnemy = (xPos : number, yPos : number, size: Point, health? : number) : EnemyState => ({
+const makeEnemy = (type : EnemyType, xPos : number, yPos : number, size: Point, health? : number) : EnemyState => ({
+  enemyType: type,
   accelerateLeft: false, accelerateRight: false,
   accelerateUp: false, accelerateDown: false,
   angle: 0, ySpeed: 0, shooting: false,
@@ -111,8 +112,8 @@ const makeEnemy = (xPos : number, yPos : number, size: Point, health? : number) 
 });
 
 export const enemyActionCreator = (dispatch : Dispatch<EnemyAction|BulletAction>) => ({
-  spawnEnemy: (xPos : number, yPos : number, size: Point, health? : number) => {
-    dispatch({type: ActionTypes.SPAWN_ENEMY, spawn: makeEnemy(xPos, yPos, size, health)})
+  spawnEnemy: (type: EnemyType, xPos : number, yPos : number, size: Point, health? : number) => {
+    dispatch({type: ActionTypes.SPAWN_ENEMY, spawn: makeEnemy(type, xPos, yPos, size, health)})
   },
   enemiesReceiveBullet: ({bulletIdx, enemies} : {bulletIdx : number, enemies: Array<number>}) => {
     enemies.forEach(enemyIdx => dispatch({type: ActionTypes.ENEMY_RECEIVES_BULLET, enemyIdx: enemyIdx, bulletIdx: bulletIdx}));

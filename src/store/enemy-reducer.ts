@@ -5,14 +5,20 @@ import { VIRT_HEIGHT, VIRT_WIDTH } from "./constants";
 import { pointWithinBox } from "../phyz/boxes";
 import { Box } from "../phyz/shapes";
 
+export enum EnemyType {
+  SKULL, SKULL_BOSS
+}
+
 export interface EnemyState extends PieuwerState {
   maxHealth: number
+  enemyType: EnemyType
 }
 
 
 export interface MultiEnemyState {
   enemies: Array<EnemyState>
 }
+
 
 
 const initialState : MultiEnemyState =  {
@@ -22,7 +28,14 @@ const initialState : MultiEnemyState =  {
 const fly = (enemyState : EnemyState) : EnemyState => ({
   ...enemyState,
   collided: false,
-  angle: enemyState.angle + 0.2 >= 360 ? 0 : enemyState.angle + 0.2
+  pos: enemyState.enemyType === EnemyType.SKULL ? {
+    x: VIRT_WIDTH/2 - Math.cos(enemyState.angle*4 * Math.PI / 180) * VIRT_WIDTH / 2,
+    y: VIRT_HEIGHT/2 - Math.sin(enemyState.angle * Math.PI / 180) * VIRT_WIDTH / 5
+  } : {
+    x: VIRT_WIDTH/2,
+    y: VIRT_HEIGHT/2 -Math.sin(enemyState.angle*4 * Math.PI / 180) * VIRT_WIDTH / 5
+  },
+  angle: enemyState.angle + 0.1 >= 360 ? 0 : enemyState.angle + 0.1
 });
 
 export default function(state : MultiEnemyState, action : EnemyAction) : MultiEnemyState {
@@ -37,7 +50,7 @@ export default function(state : MultiEnemyState, action : EnemyAction) : MultiEn
         enemies: state.enemies.map((enemy, idx) => ({
           ...enemy,
           health: idx === action.enemyIdx ? enemy.health - 1 : enemy.health
-        })).filter((enemy) => enemy.health > 0)
+        }))
       };
     case ActionTypes.SPAWN_ENEMY:
       return {
@@ -50,13 +63,14 @@ export default function(state : MultiEnemyState, action : EnemyAction) : MultiEn
         ...state,
         enemies: state.enemies.map((enemy, idx) => ({
           ...enemy,
+          health: idx === action.enemyIdx ? enemy.health - 0.04 : enemy.health,
           collided: idx === action.enemyIdx ? true : enemy.collided
         }))
       }
     case ActionTypes.UPDATE:
       return {
         ...state,
-        enemies: state.enemies.map(fly)
+        enemies: state.enemies.map(fly).filter((enemy) => enemy.health > 0)
       };
       break;
     default:

@@ -86,6 +86,11 @@ export const drawCollisions = <T extends PieuwerState>(thing : T, collisions: Ar
             ctx.arc(tl.x * scale, tl.y * scale, Math.random() * 20 * scale, 0, Math.PI*2);
             ctx.fill();
           })
+        } else {
+          const tl = translateToOrigin(thing.pos, rotateAroundOrigin(shape, (thing.angle+180) * Math.PI / 180));
+          ctx.beginPath();
+          ctx.arc(tl.x * scale, tl.y * scale, Math.random() * 20 * scale, 0, Math.PI*2);
+          ctx.fill();
         }
       })
     })

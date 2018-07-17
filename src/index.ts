@@ -16,6 +16,7 @@ import { ActionTypes } from './actions/action-types';
 import { Point } from './phyz/shapes';
 import { detectBulletToEnemyCollisions, detectPieuwerToEnemyCollisions, PieuwerToEnemyCollisions } from './phyz/collisions';
 import { PieuwerKey } from './store/pieuwer-reducer';
+import { EnemyType } from './store/enemy-reducer';
 
 const store = createStore(combineReducers(reducers));
 
@@ -91,6 +92,7 @@ const handlePieuwerToEnemyCollisions = (collisions : PieuwerToEnemyCollisions) =
   }
 };
 
+let gameOver = false;
 const game = () => {
   const renderLoop = () => {
     const { pieuwerStates, bulletStates, enemyStates, explosionStates, collisionStates } = store.getState();
@@ -102,8 +104,8 @@ const game = () => {
       explosionStates.explosions.map(drawExplosion)).concat(
       enemyStates.enemies.map(drawEnemy).concat(
       [
-            drawPieuwer("pieuwerOne", pieuwerStates.pieuwerOne),
-            drawPieuwer("pieuwerTwo", pieuwerStates.pieuwerTwo),
+          drawPieuwer("pieuwerOne", pieuwerStates.pieuwerOne),
+          drawPieuwer("pieuwerTwo", pieuwerStates.pieuwerTwo),
       ]).concat(
       Object.keys(collisionStates.collisions).map(piewerKey => drawCollisions(pieuwerStates[piewerKey],
         collisionStates.collisions[piewerKey].map(c => c.collisions.collidingCorners)))).concat(
@@ -111,19 +113,19 @@ const game = () => {
         .map(({enemyIdx, collisions}) => drawCollisions(enemyStates.enemies[enemyIdx], [collisions.collidingEnemyCorners]))
       )
     ));
-  	requestAnimationFrame(renderLoop);
+    if (!gameOver) {
+  	   requestAnimationFrame(renderLoop);
+     }
   };
 
 
   for (let i = 0; i < 16; i++) {
-    spawnEnemy(i * 100, 150, {x: 60, y: 80});
-    spawnEnemy(i * 100 + 50, 250, {x: 60, y: 80});
+    setTimeout(() => spawnEnemy(EnemyType.SKULL, -100, -100, {x: 60, y: 80}, 30), i * 500);
   }
-  //spawnEnemy(200, 200, {x: 200, y: 320}, 100);
+  setTimeout(() => spawnEnemy(EnemyType.SKULL_BOSS, VIRT_WIDTH / 2, VIRT_HEIGHT / 2, {x: 400, y: 640}, 300), 8000);
+  setTimeout(() => spawnEnemy(EnemyType.SKULL_BOSS, VIRT_WIDTH / 2, VIRT_HEIGHT / 2, {x: 400, y: 640}, 300), 12000);
 
-  spawnEnemy(600, 200, {x: 200, y: 320}, 100);
-  //spawnEnemy(1000, 200, {x: 200, y: 320}, 100);
-
+  let uploopinterval : number, bulletInterval : number;
   const updateLoop = () => {
 
 
@@ -131,11 +133,19 @@ const game = () => {
     detectBulletToEnemyCollisions(store.getState())
       .forEach(handleBulletEnemyCollision);
     handlePieuwerToEnemyCollisions(detectPieuwerToEnemyCollisions(store.getState()));
+
+    if (store.getState().pieuwerStates.pieuwerOne.health < 0 || store.getState().pieuwerStates.pieuwerTwo.health < 0) {
+      mainLayer.style.opacity = "0";
+      gameOver = true;
+      clearInterval(uploopinterval);
+      clearInterval(bulletInterval);
+      document.body.innerHTML = `<div style="color: white; text-align: center">BOEM! GAME OVER</div>`;
+      setTimeout(() => location.reload(), 3000);
+    }
   }
+  uploopinterval = window.setInterval(updateLoop, 10);
 
-  window.setInterval(updateLoop, 10);
-
-  window.setInterval(() => {
+  bulletInterval = window.setInterval(() => {
     const { pieuwerOne, pieuwerTwo } = store.getState().pieuwerStates;
     spawnBullet(pieuwerOne);
     spawnBullet(pieuwerTwo);
