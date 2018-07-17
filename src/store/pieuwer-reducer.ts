@@ -57,13 +57,20 @@ const range = (start : number, end : number, step : number = 1) : Array<number> 
 }
 
 
-const initializePieuwerState = (xPos : number) : PieuwerState => ({
+const initializePieuwerState = (xPos : number, collisionShapes : Array<Box|Circle>) : PieuwerState => ({
   axisX: null, axisY: null,
   accelerateLeft: false, accelerateRight: false,
   accelerateUp: false, accelerateDown: false,
   angle: 0, ySpeed: 0, shooting: false,
   health: 100,
-  collisionShapes: [
+  collisionShapes: collisionShapes,
+  pos: {x: xPos, y: VIRT_HEIGHT - 150},
+  size: {x: PIEUWER_WIDTH, y: PIEUWER_HEIGHT},
+  collided: false
+});
+
+const initialState : MultiPieuwerState  = {
+  pieuwerOne: initializePieuwerState(200,  [
     {x: (110 -  (PIEUWER_WIDTH  / 2)), y: (0 - (PIEUWER_HEIGHT / 2)), w: 20, h: 230},
   ].concat(range(50, 100, 10).map(x => ({
     x: (x -(PIEUWER_WIDTH  / 2)),
@@ -75,15 +82,27 @@ const initializePieuwerState = (xPos : number) : PieuwerState => ({
     y: 30 + (x*1.1),
     w: 10,
     h: 80 - x*1.1
-  }))),
-  pos: {x: xPos, y: VIRT_HEIGHT - 150},
-  size: {x: PIEUWER_WIDTH, y: PIEUWER_HEIGHT},
-  collided: false
-});
-
-const initialState : MultiPieuwerState  = {
-  pieuwerOne: initializePieuwerState(200),
-  pieuwerTwo: initializePieuwerState(VIRT_WIDTH - 200)
+  })))),
+  pieuwerTwo: initializePieuwerState(VIRT_WIDTH - 200, [
+    {x: (110 -  (PIEUWER_WIDTH  / 2)), y: (0 - (PIEUWER_HEIGHT / 2)), w: 20, h: 230},
+  ].concat(range(60, 100, 10).map(x => ({
+    x: (x -(PIEUWER_WIDTH  / 2)),
+    y: (PIEUWER_HEIGHT / 2) - x * 1.5 - 40,
+    w: 10,
+    h: x * 1.5 - 40
+  }))).concat(range(10, 60, 10).map(x => ({
+    x: x,
+    y: (x*1.6) - (PIEUWER_HEIGHT / 2) + 20 ,
+    w: 10,
+    h: 140- x*1.6
+  }))).concat([
+    {x: -80, y: 65, w: 80, h: 15},
+    {x: -70, y: 100, w: 70, h: 10},    
+    {x: 0, y: 50, w: 85, h: 20},
+    {x: 0, y: 70, w: 60, h: 20},
+    {x: 0, y: 90, w: 85, h: 20},
+  ])
+)
 };
 console.log(initialState.pieuwerOne.collisionShapes);
 
