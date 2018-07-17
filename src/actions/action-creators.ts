@@ -82,7 +82,7 @@ const makeEnemy = (type : EnemyType, xPos : number, yPos : number, size: Point, 
   angle: 0, ySpeed: 0, shooting: false,
   axisX: null, axisY: null,
   size: size,
-  collisionShapes: [
+  collisionShapes: type === EnemyType.SKULL_BOSS ? [
     {
       x: (4 -  (ENEMY_WIDTH  / 2)) * (size.x / ENEMY_WIDTH),
       y: (63 - (ENEMY_HEIGHT / 2)) * (size.y / ENEMY_HEIGHT),
@@ -105,6 +105,15 @@ const makeEnemy = (type : EnemyType, xPos : number, yPos : number, size: Point, 
       y: (50 - (ENEMY_HEIGHT / 2)) * (size.y / ENEMY_HEIGHT),
       radius: 20 * (size.x / ENEMY_WIDTH)
     }
+  ] : [
+    {x:-5,y:-55,radius: 65},
+    {x:-74,y:-55,w: 135,h:150},
+    {x:-165,y:58,w: 315,h:50},
+    {x:-150,y:38,w: 285,h:20},
+    {x:-135,y:18,w: 255,h:20},
+    {x:-145,y:120,radius: 35},
+    {x:130,y:120,radius: 35},
+
   ],
   health: health || 4, maxHealth: health || 4,
   pos: {y: yPos, x: xPos},

@@ -6,7 +6,7 @@ import { pointWithinBox } from "../phyz/boxes";
 import { Box } from "../phyz/shapes";
 
 export enum EnemyType {
-  SKULL, SKULL_BOSS
+  SKULL, SKULL_BOSS, ENEMY_TWO
 }
 
 export interface EnemyState extends PieuwerState {

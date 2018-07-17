@@ -1,7 +1,7 @@
 import { BulletState } from "./store/bullet-reducer";
 import { Drawable } from "./resizable-canvas/drawable";
 import { PieuwerState, PieuwerKey } from "./store/pieuwer-reducer";
-import { EnemyState } from "./store/enemy-reducer";
+import { EnemyState, EnemyType } from "./store/enemy-reducer";
 import { ExplosionState } from "./store/explosion-reducer";
 import { isBox, Box, Circle, Point, getBoundingBox } from "./phyz/shapes";
 import { ENEMY_WIDTH, ENEMY_HEIGHT, PIEUWER_WIDTH, PIEUWER_HEIGHT } from "./store/constants";
@@ -15,6 +15,8 @@ const pieuwerTwoPng = new Image();
 pieuwerTwoPng.src = "./img/pieuwerTwo.png";
 const enemyPng = new Image();
 enemyPng.src = "./img/enemy.png";
+const enemy2Png = new Image();
+enemy2Png.src = "./img/enemy2.png";
 
 const pieuwerPngs : {[key : string] : HTMLImageElement} = {
   pieuwerOne: pieuwerOnePng,
@@ -115,12 +117,13 @@ export const drawEnemy = (enemy : EnemyState) : Drawable =>
     ctx.rotate(enemy.angle * Math.PI / 180);
     //ctx.globalAlpha = (enemy.health / enemy.maxHealth) * 0.5 + 0.5;
     ctx.strokeStyle = "white";
-    ctx.drawImage(enemyPng,0,0, ENEMY_WIDTH, ENEMY_HEIGHT,
+    ctx.drawImage(enemy.enemyType === EnemyType.ENEMY_TWO ?enemy2Png :enemyPng,0,0, ENEMY_WIDTH, ENEMY_HEIGHT,
       -(enemy.size.x / 2) * scale,
       -(enemy.size.y / 2) * scale,
       enemy.size.x * scale,
       enemy.size.y * scale);
     ctx.restore();
+    //ctx.strokeStyle = "white"
     //drawCollisionShapes(ctx, scale, enemy.collisionShapes, enemy.pos, enemy.angle);
     //drawBox(getBoundingBox(enemy), ctx, scale, enemy.pos, enemy.angle, enemy.collided ? "red" : "rgb(128,128,255)");
   };
