@@ -78,7 +78,7 @@ const handleBulletEnemyCollision = (params : {bulletIdx : number, enemies: Array
   spawnExplosion(params.collsionPos, 5)
 }
 
-const handlePieuwerToEnemyCollisions : (p : {pieuwers : Array<PieuwerKey>, enemies : Array<number>}) => void =
+const handlePieuwerToEnemyCollisions : (p : {pieuwers : Array<string>, enemies : Array<number>}) => void =
   ({pieuwers, enemies}) => {
     pieuwers.forEach(pieuwerKey => store.dispatch({type: ActionTypes.PIEUWER_COLLIDES, player: pieuwerKey}));
     enemies.forEach(enemyIdx => store.dispatch({type: ActionTypes.ENEMY_COLLIDES_WITH_PIEUWER, enemyIdx: enemyIdx}));
@@ -101,14 +101,16 @@ const game = () => {
   	requestAnimationFrame(renderLoop);
   };
 
-
+/*
   for (let i = 0; i < 16; i++) {
     spawnEnemy(i * 100, 150, {x: 60, y: 80});
     spawnEnemy(i * 100 + 50, 250, {x: 60, y: 80});
-  }
-  spawnEnemy(200, 200, {x: 200, y: 320}, 100);
+  }*/
+  //spawnEnemy(200, 200, {x: 200, y: 320}, 100);
+  spawnEnemy(100, 150, {x: 60, y: 80});
+
   spawnEnemy(600, 200, {x: 200, y: 320}, 100);
-  spawnEnemy(1000, 200, {x: 200, y: 320}, 100);
+  //spawnEnemy(1000, 200, {x: 200, y: 320}, 100);
 
   const updateLoop = () => {
 
