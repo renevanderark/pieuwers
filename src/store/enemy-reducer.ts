@@ -31,6 +31,11 @@ export default function(state : MultiEnemyState, action : EnemyAction) : MultiEn
   }
   let newState = state;
   switch (action.type) {
+    case ActionTypes.RESET_ENEMY_CENTRAL:
+      return {
+        ...state,
+        spawnCentral: initialState.spawnCentral
+      };
     case ActionTypes.ENEMY_RECEIVES_BULLET:
       return {
         ...state,

@@ -85,5 +85,6 @@ const makeEnemyTwoShapes = (scale : number) : Array<Box|Circle> => [
 export const makeEnemyCollisionShapes : {[key : string]: (scale : number) => Array<Box|Circle>}= {
   [EnemyType.SKULL]: makeSkullShapes,
   [EnemyType.SKULL_BOSS]: makeSkullShapes,
+  [EnemyType.SKULL_SPAWN]: makeSkullShapes,
   [EnemyType.ENEMY_TWO]: makeEnemyTwoShapes
 }

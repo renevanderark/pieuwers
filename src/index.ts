@@ -17,6 +17,7 @@ import { Point } from './phyz/shapes';
 import { detectBulletToEnemyCollisions, detectPieuwerToEnemyCollisions, PieuwerToEnemyCollisions, detectEnemyBulletToPieuwerCollisions } from './phyz/collisions';
 import { PieuwerKey } from './store/pieuwer-reducer';
 import { EnemyType } from './enemies/types';
+import { level1 } from './levels';
 
 const store = createStore(combineReducers(reducers));
 
@@ -125,15 +126,7 @@ const game = () => {
      }
   };
 
-
-  for (let i = 0; i < 12; i++) {
-    setTimeout(() => spawnEnemy(EnemyType.SKULL, VIRT_WIDTH / 2, -VIRT_HEIGHT / 3, 0.75, 20), i * 250);
-  }
-
-  for (let i = 0; i < 4; i++) {
-    spawnEnemy(EnemyType.ENEMY_TWO, (VIRT_WIDTH / 8) + i * (VIRT_WIDTH / 4), -VIRT_HEIGHT / 3, 1, 10);
-  }
-
+  let spawns = level1(spawnEnemy);
   //setTimeout(() => spawnEnemy(EnemyType.SKULL_BOSS, VIRT_WIDTH / 2, VIRT_HEIGHT / 3, 4, 150), 12000);
 
   let uploopinterval : number, bulletInterval : number;
@@ -163,12 +156,17 @@ const game = () => {
       setTimeout(() => location.reload(), 3000);
     }
     if (gameState.enemyStates.enemies.length === 0) {
-      mainLayer.style.opacity = "0";
-      gameOver = true;
-      clearInterval(uploopinterval);
-      clearInterval(bulletInterval);
-      document.body.innerHTML = `<div style="color: white; font-size: 5em; text-align: center">jA!</div>`;
-      setTimeout(() => location.reload(), 3000);
+      if (spawns.length > 0) {
+        store.dispatch({type: ActionTypes.RESET_ENEMY_CENTRAL});
+        spawns.shift()();
+      } else {
+        mainLayer.style.opacity = "0";
+        gameOver = true;
+        clearInterval(uploopinterval);
+        clearInterval(bulletInterval);
+        document.body.innerHTML = `<div style="color: white; font-size: 5em; text-align: center">jA!</div>`;
+        setTimeout(() => location.reload(), 3000);
+      }
     }
   }
   uploopinterval = window.setInterval(updateLoop, 10);
