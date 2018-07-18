@@ -78,8 +78,8 @@ export interface CollisionAction {
 
 
 export const enemyActionCreator = (dispatch : Dispatch<EnemyAction|BulletAction>) => ({
-  spawnEnemy: (type: EnemyType, xPos : number, yPos : number, size: Point, health? : number) => {
-    dispatch({type: ActionTypes.SPAWN_ENEMY, spawn: makeEnemy(type, xPos, yPos, size, health)})
+  spawnEnemy: (type: EnemyType, xPos : number, yPos : number, scale: number = 1, health? : number) => {
+    dispatch({type: ActionTypes.SPAWN_ENEMY, spawn: makeEnemy(type, xPos, yPos, scale, health)})
   },
   enemiesReceiveBullet: ({bulletIdx, enemies} : {bulletIdx : number, enemies: Array<number>}) => {
     enemies.forEach(enemyIdx => dispatch({type: ActionTypes.ENEMY_RECEIVES_BULLET, enemyIdx: enemyIdx, bulletIdx: bulletIdx}));

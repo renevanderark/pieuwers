@@ -2,54 +2,87 @@ import { EnemyType } from "./types";
 import { Circle, Box, isBox, Point } from "../phyz/shapes";
 import { ENEMY_BOUNDS } from "./enemy-bounding-boxes";
 
-const makeSkullShapes = (size : Point) : Array<Box|Circle> => [
+const makeSkullShapes = (scale : number) : Array<Box|Circle> => [
   {
-    x: (4 -  (ENEMY_BOUNDS[EnemyType.SKULL].x  / 2)) * (size.x / ENEMY_BOUNDS[EnemyType.SKULL].x),
-    y: (63 - (ENEMY_BOUNDS[EnemyType.SKULL].y / 2)) * (size.x / ENEMY_BOUNDS[EnemyType.SKULL].x),
-    w: 26 * (size.x / ENEMY_BOUNDS[EnemyType.SKULL].x),
-    h: 95 * (size.x / ENEMY_BOUNDS[EnemyType.SKULL].x)
+    x: (4 -  (ENEMY_BOUNDS[EnemyType.SKULL].x  / 2)) * scale,
+    y: (63 - (ENEMY_BOUNDS[EnemyType.SKULL].y / 2)) * scale,
+    w: 26 * scale,
+    h: 95 * scale
   },
   {
-    x: (30 -  (ENEMY_BOUNDS[EnemyType.SKULL].x  / 2)) * (size.x / ENEMY_BOUNDS[EnemyType.SKULL].x),
-    y: (63 - (ENEMY_BOUNDS[EnemyType.SKULL].y / 2)) * (size.x / ENEMY_BOUNDS[EnemyType.SKULL].x),
-    w: 51 * (size.x / ENEMY_BOUNDS[EnemyType.SKULL].x),
-    h: 82 * (size.x / ENEMY_BOUNDS[EnemyType.SKULL].x)
+    x: (30 -  (ENEMY_BOUNDS[EnemyType.SKULL].x  / 2)) * scale,
+    y: (63 - (ENEMY_BOUNDS[EnemyType.SKULL].y / 2)) * scale,
+    w: 51 * scale,
+    h: 82 * scale
   },
   {
-    x: (58 -  (ENEMY_BOUNDS[EnemyType.SKULL].x  / 2)) * (size.x / ENEMY_BOUNDS[EnemyType.SKULL].x),
-    y: (42 - (ENEMY_BOUNDS[EnemyType.SKULL].y / 2)) * (size.x / ENEMY_BOUNDS[EnemyType.SKULL].x),
-    radius: 40 * (size.x / ENEMY_BOUNDS[EnemyType.SKULL].x)
+    x: (58 -  (ENEMY_BOUNDS[EnemyType.SKULL].x  / 2)) * scale,
+    y: (42 - (ENEMY_BOUNDS[EnemyType.SKULL].y / 2)) * scale,
+    radius: 40 * scale
   },
   {
-    x: (27 -  (ENEMY_BOUNDS[EnemyType.SKULL].x  / 2)) * (size.x / ENEMY_BOUNDS[EnemyType.SKULL].x),
-    y: (50 - (ENEMY_BOUNDS[EnemyType.SKULL].y / 2)) * (size.x / ENEMY_BOUNDS[EnemyType.SKULL].x),
-    radius: 20 * (size.x / ENEMY_BOUNDS[EnemyType.SKULL].x)
+    x: (27 -  (ENEMY_BOUNDS[EnemyType.SKULL].x  / 2)) * scale,
+    y: (50 - (ENEMY_BOUNDS[EnemyType.SKULL].y / 2)) * scale,
+    radius: 20 * scale
   }
 ];
 
-const makeEnemyTwoShapes = (size : Point) : Array<Box|Circle> => [
-  {x:-5,y:-55,radius: 65},
-  {x:-74,y:-55,w: 135,h:150},
-  {x:-165,y:58,w: 315,h:50},
-  {x:-150,y:38,w: 285,h:20},
-  {x:-135,y:18,w: 255,h:20},
-  {x:-145,y:120,radius: 35},
-  {x:130,y:120,radius: 35},
+const makeEnemyTwoShapes = (scale : number) : Array<Box|Circle> => [
+  {
+    x: -1.25,
+    y: -13.75,
+    radius: 16.25
+  },
+  {
+    x: -18.5,
+    y: -13.75,
+    w: 33.75,
+    h: 37.5
+  },
+  {
+    x: -41.25,
+    y: 14.5,
+    w: 78.75,
+    h: 12.5
+  },
+  {
+    x: -37.5,
+    y: 9.5,
+    w: 71.25,
+    h: 5
+  },
+  {
+    x: -33.75,
+    y: 4.5,
+    w: 63.75,
+    h: 5
+  },
+  {
+    x: -36.25,
+    y: 30,
+    radius: 8.75
+  },
+  {
+    x: 32.5,
+    y: 30,
+    radius: 8.75
+  }
 ].map(shape => isBox(shape) ?
   {
-    x: (shape.x / 4) * (size.x / ENEMY_BOUNDS[EnemyType.ENEMY_TWO].x),
-    y: (shape.y / 4) * (size.x / ENEMY_BOUNDS[EnemyType.ENEMY_TWO].x),
-    w: (shape.w / 4) * (size.x / ENEMY_BOUNDS[EnemyType.ENEMY_TWO].x),
-    h: (shape.h / 4) * (size.x / ENEMY_BOUNDS[EnemyType.ENEMY_TWO].x)
+    x: shape.x * scale,
+    y: (shape.y-6) * scale,
+    w: shape.w * scale,
+    h: shape.h * scale
   } :
   {
-    x: (shape.x / 4) * (size.x / ENEMY_BOUNDS[EnemyType.ENEMY_TWO].x),
-    y: (shape.y / 4) * (size.x / ENEMY_BOUNDS[EnemyType.ENEMY_TWO].x),
-    radius: (shape.radius / 4) * (size.x / ENEMY_BOUNDS[EnemyType.ENEMY_TWO].x),
+    x: shape.x * scale,
+    y: (shape.y-6) * scale,
+    radius: shape.radius * scale,
   }
-)
+);
 
-export const makeEnemyCollisionShapes : {[key : string]: (size : Point) => Array<Box|Circle>}= {
+
+export const makeEnemyCollisionShapes : {[key : string]: (scale : number) => Array<Box|Circle>}= {
   [EnemyType.SKULL]: makeSkullShapes,
   [EnemyType.SKULL_BOSS]: makeSkullShapes,
   [EnemyType.ENEMY_TWO]: makeEnemyTwoShapes
