@@ -27,7 +27,7 @@ const { spawnExplosion } = explosionActionCreator(store.dispatch);
 
 const mainLayer = document.getElementById("main-layer");
 if (!(mainLayer instanceof HTMLCanvasElement)) { throw new TypeError("wrong element type"); }
-const mainLayerCtx = mainLayer.getContext("2d");
+const mainLayerCtx = mainLayer.getContext("2d", { alpha: false });
 const mainFrameRenderer = getFrameRenderer(mainLayerCtx, mainLayer);
 
 const debug = document.getElementById("debug");

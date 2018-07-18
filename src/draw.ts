@@ -45,16 +45,31 @@ const drawCollisionShapes = (ctx: CanvasRenderingContext2D, scale: number, colli
   });
 }
 
+const imgCache : {[key : string]: HTMLCanvasElement}= {};
+
+const getImage = (img : HTMLImageElement, imgDims: Point, targetRect: Point) : HTMLCanvasElement => {
+  const imgKey = `${img.src}-${targetRect.x}-${targetRect.y}`;
+  if (!(imgKey in imgCache)) {
+    imgCache[imgKey] = document.createElement("canvas");
+    imgCache[imgKey].width = targetRect.x;
+    imgCache[imgKey].height = targetRect.y;
+    imgCache[imgKey].getContext('2d').drawImage(
+      img, 0, 0, imgDims.x, imgDims.y,
+      0, 0, targetRect.x, targetRect.y
+    );
+  }
+  return imgCache[imgKey];
+}
+
 const drawThing = <T extends PieuwerState>(thing : T, img : HTMLImageElement, imgDims : Point) : Drawable =>
   (ctx: CanvasRenderingContext2D, scale: number) => {
     ctx.save();
-    ctx.translate(thing.pos.x * scale, thing.pos.y * scale);
+    ctx.translate(Math.floor(thing.pos.x * scale), Math.floor(thing.pos.y * scale));
     ctx.rotate(thing.angle * Math.PI / 180);
-    ctx.drawImage(img, 0, 0,
-      imgDims.x, imgDims.y,
-      -(thing.size.x / 2)*scale, -(thing.size.y / 2)*scale,
-      thing.size.x * scale, thing.size.y * scale);
-    //drawCollisionShapes(ctx, scale, thing.collisionShapes);    
+    ctx.drawImage(getImage(img, imgDims, {x:Math.ceil(thing.size.x * scale),y:Math.ceil(thing.size.y * scale)}),
+      Math.floor(-(thing.size.x / 2)*scale),
+      Math.floor(-(thing.size.y / 2)*scale));
+    // drawCollisionShapes(ctx, scale, thing.collisionShapes);
     ctx.restore();
   };
 
@@ -101,23 +116,22 @@ export const drawBullet = (bs : BulletState) : Drawable =>
       ctx.beginPath();
       ctx.fillStyle = `rgb(255,255,255)`;
       ctx.arc(
-        bs.pos.x * scale,
-        bs.pos.y * scale,
-        3 * scale, 0, Math.PI*2
+        Math.floor(bs.pos.x * scale),
+        Math.floor(bs.pos.y * scale),
+        Math.ceil(3 * scale), 0, Math.PI*2
       );
       ctx.fill();
     };
-
-
 
 export const drawExplosion = (explosion : ExplosionState) =>
   (ctx: CanvasRenderingContext2D, scale: number) => {
     ctx.beginPath();
     ctx.fillStyle = `rgba(255,255,255, ${0.5 + ((explosion.size / explosion.initSize) * 0.5)})`;
     ctx.arc(
-      explosion.pos.x * scale,
-      explosion.pos.y * scale,
-      5 * scale * (explosion.initSize - explosion.size), 0, Math.PI*2
+      Math.floor(explosion.pos.x * scale),
+      Math.floor(explosion.pos.y * scale),
+      Math.ceil(5 * scale * (explosion.initSize - explosion.size)),
+      0, Math.PI*2
     );
     ctx.fill();
   };
