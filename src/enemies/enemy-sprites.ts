@@ -5,9 +5,14 @@ skullPng.src = "./img/enemy.png";
 const enemy2Png = new Image();
 enemy2Png.src = "./img/enemy2.png";
 
+const multiLaserPng = new Image();
+multiLaserPng.src = "./img/enemy3.png";
+
+
 export const enemySprites : {[key : string]: HTMLImageElement}= {
   [EnemyType.SKULL]: skullPng,
   [EnemyType.SKULL_BOSS]: skullPng,
   [EnemyType.SKULL_SPAWN]: skullPng,
-  [EnemyType.ENEMY_TWO]: enemy2Png
+  [EnemyType.ENEMY_TWO]: enemy2Png,
+  [EnemyType.MULTI_LASER]: multiLaserPng
 }
