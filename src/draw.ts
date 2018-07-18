@@ -65,8 +65,17 @@ const drawThing = <T extends PieuwerState>(thing : T, img : HTMLImageElement, im
   (ctx: CanvasRenderingContext2D, scale: number) => {
     ctx.save();
     ctx.translate(Math.floor(thing.pos.x * scale), Math.floor(thing.pos.y * scale));
+    const health = thing.health / thing.maxHealth;
+    const healthBarWidth = "enemyType" in thing ? thing.size.x * scale : thing.size.x * scale * 0.25;
+
+    ctx.fillStyle = "rgba(255,0,0,0.8)";
+    ctx.fillRect(-(thing.size.x / 2)*scale, -((thing.size.y / 2) + 15) * scale, healthBarWidth, 5 * scale);
+
+    ctx.fillStyle = "rgb(96,255,96)";
+    ctx.fillRect(-(thing.size.x / 2)*scale, -((thing.size.y / 2) + 15) * scale, healthBarWidth * health, 5 * scale);
+
     ctx.rotate(thing.angle * Math.PI / 180);
-    ctx.drawImage(getImage(img, imgDims, {x:Math.ceil(thing.size.x * scale),y:Math.ceil(thing.size.y * scale)}),
+    ctx.drawImage(getImage(img, imgDims, {x:Math.ceil(thing.size.x * scale) ,y: Math.ceil(thing.size.y * scale)}),
       Math.floor(-(thing.size.x / 2)*scale),
       Math.floor(-(thing.size.y / 2)*scale));
     // drawCollisionShapes(ctx, scale, thing.collisionShapes);

@@ -8,7 +8,6 @@ import { EnemyType } from "../enemies/types";
 import { fly } from "../enemies/enemy-fly-behaviours";
 
 export interface EnemyState extends PieuwerState {
-  maxHealth: number
   enemyType: EnemyType
   startPos: Point
   trajectory: number

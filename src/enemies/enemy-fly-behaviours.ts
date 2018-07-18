@@ -31,7 +31,7 @@ const flyBehaviours : {[key: string]: (enemyState : EnemyState, spawnCentral : P
     },
     trajectory: enemyState.trajectory + 0.5 >= 360 ? 0 : enemyState.trajectory + 0.5,
     shooting: enemyState.shootTimer <= 0 ? true : false,
-    shootTimer: enemyState.shootTimer <= 0 ? 100 : enemyState.shootTimer - 1
+    shootTimer: enemyState.shootTimer <= 0 ? 50 : enemyState.shootTimer - 1
   })
 }
 

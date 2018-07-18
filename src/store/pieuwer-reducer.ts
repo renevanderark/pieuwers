@@ -35,6 +35,7 @@ export interface PieuwerState {
   size: Point
   shooting: boolean
   health: number
+  maxHealth: number
 }
 
 export interface MultiPieuwerState {
@@ -61,7 +62,8 @@ const initializePieuwerState = (xPos : number, collisionShapes : Array<Box|Circl
   accelerateLeft: false, accelerateRight: false,
   accelerateUp: false, accelerateDown: false,
   angle: 0, ySpeed: 0, shooting: false,
-  health: 500,
+  health: 250,
+  maxHealth: 250,
   collisionShapes: collisionShapes,
   pos: {x: xPos, y: VIRT_HEIGHT - 150},
   size: {x: PIEUWER_WIDTH, y: PIEUWER_HEIGHT},
