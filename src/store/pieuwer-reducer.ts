@@ -35,7 +35,6 @@ export interface PieuwerState {
   size: Point
   shooting: boolean
   health: number
-  collided: boolean
 }
 
 export interface MultiPieuwerState {
@@ -66,7 +65,6 @@ const initializePieuwerState = (xPos : number, collisionShapes : Array<Box|Circl
   collisionShapes: collisionShapes,
   pos: {x: xPos, y: VIRT_HEIGHT - 150},
   size: {x: PIEUWER_WIDTH, y: PIEUWER_HEIGHT},
-  collided: false
 });
 
 const initialState : MultiPieuwerState  = {
@@ -107,7 +105,6 @@ const initialState : MultiPieuwerState  = {
 
 const updatePieuwerState = (pieuwerState : PieuwerState) : PieuwerState => ({
     ...pieuwerState,
-    collided: false,
     ySpeed: pieuwerState.axisY !== null
       ? pieuwerState.axisY === 0
         ? 0
@@ -208,7 +205,6 @@ export default function(state : MultiPieuwerState, action : KeyAction) {
           ...state,
           [action.player] : {
             ...state[action.player],
-            collided: true,
             health: state[action.player].health - 1
           }
       };

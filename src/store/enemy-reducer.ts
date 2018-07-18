@@ -3,22 +3,27 @@ import { PieuwerState } from "./pieuwer-reducer";
 import { EnemyAction } from "../actions/action-creators";
 import { VIRT_HEIGHT, VIRT_WIDTH } from "./constants";
 import { pointWithinBox } from "../phyz/boxes";
-import { Box } from "../phyz/shapes";
+import { Box, Point } from "../phyz/shapes";
 import { EnemyType } from "../enemies/types";
 import { fly } from "../enemies/enemy-fly-behaviours";
 
 export interface EnemyState extends PieuwerState {
   maxHealth: number
   enemyType: EnemyType
+  startPos: Point
+  trajectory: number
+  shootTimer: number
 }
 
 
 export interface MultiEnemyState {
   enemies: Array<EnemyState>
+  spawnCentral: Point
 }
 
 const initialState : MultiEnemyState =  {
   enemies: [],
+  spawnCentral: {x: VIRT_WIDTH / 2, y: -(VIRT_HEIGHT / 3)}
 }
 
 export default function(state : MultiEnemyState, action : EnemyAction) : MultiEnemyState {
@@ -46,14 +51,18 @@ export default function(state : MultiEnemyState, action : EnemyAction) : MultiEn
         ...state,
         enemies: state.enemies.map((enemy, idx) => ({
           ...enemy,
-          health: idx === action.enemyIdx ? enemy.health - 0.04 : enemy.health,
-          collided: idx === action.enemyIdx ? true : enemy.collided
+          health: idx === action.enemyIdx ? enemy.health - 0.04 : enemy.health
         }))
       }
     case ActionTypes.UPDATE:
       return {
         ...state,
-        enemies: state.enemies.map(fly).filter((enemy) => enemy.health > 0)
+        spawnCentral: {
+          x: state.spawnCentral.x,
+          y: state.spawnCentral.y < VIRT_HEIGHT / 2 ? state.spawnCentral.y + 1 : VIRT_HEIGHT / 2
+        },
+        enemies: state.enemies.map(enemy => fly(enemy, state.spawnCentral))
+          .filter((enemy) => enemy.health > 0)
       };
       break;
     default:

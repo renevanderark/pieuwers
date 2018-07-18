@@ -14,5 +14,7 @@ export const makeEnemy = (type : EnemyType, xPos : number, yPos : number, scale:
   collisionShapes: makeEnemyCollisionShapes[type](scale),
   health: health || 4, maxHealth: health || 4,
   pos: {y: yPos, x: xPos},
-  collided: false
+  startPos: {y: yPos, x: xPos},
+  trajectory: 0,
+  shootTimer: 100
 });

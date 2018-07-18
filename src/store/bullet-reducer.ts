@@ -8,22 +8,25 @@ import { Point } from "../phyz/shapes";
 export interface BulletState {
   trajectory: number
   pos: Point
+  speed: number
 }
 
 export interface MultiBulletState {
   bullets: Array<BulletState>
+  enemyBullets: Array<BulletState>
 }
 
 
 const initialState : MultiBulletState  = {
-  bullets: []
+  bullets: [],
+  enemyBullets: []
 };
 
 const fly = (bullet : BulletState) : BulletState => ({
   ...bullet,
   pos: {
-    x: bullet.pos.x + Math.cos(bullet.trajectory) * 10,
-    y: bullet.pos.y + Math.sin(bullet.trajectory) * 10
+    x: bullet.pos.x + Math.cos(bullet.trajectory) * bullet.speed,
+    y: bullet.pos.y + Math.sin(bullet.trajectory) * bullet.speed
   }
 });
 
@@ -35,22 +38,24 @@ export default function(state : MultiBulletState, action : BulletAction) : Multi
     return initialState;
   }
   switch (action.type) {
-    case ActionTypes.ENEMY_RECEIVES_BULLET:
-    return {
-      bullets: state.bullets.filter((bullet, idx) => idx !== action.bulletIdx)
-    };
+    case ActionTypes.REMOVE_BULLET:
+      return {
+        ...state,
+        [action.bulletType]: state[action.bulletType].filter((bullet, idx) => idx !== action.bulletIdx)
+      };
     case ActionTypes.SPAWN_BULLET:
       return {
-        bullets: state.bullets.concat({
+        ...state,
+        [action.bulletType]: state[action.bulletType].concat({
           pos: { x: action.xPos, y: action.yPos },
-          trajectory: action.trajectory
+          trajectory: action.trajectory,
+          speed: action.bulletType === "enemyBullets" ? 4 : 10
         })
       };
     case ActionTypes.UPDATE:
       return {
-        bullets: state.bullets
-          .map(fly)
-          .filter(withinBounds)
+        enemyBullets: state.enemyBullets.map(fly).filter(withinBounds),
+        bullets: state.bullets.map(fly).filter(withinBounds)
       };
     default:
       return state;

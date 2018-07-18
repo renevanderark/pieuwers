@@ -57,6 +57,7 @@ export interface BulletAction {
   yPos?: number
   trajectory?: number
   bulletIdx?: number
+  bulletType?: "bullets"|"enemyBullets"
 }
 
 export interface EnemyAction {
@@ -82,7 +83,10 @@ export const enemyActionCreator = (dispatch : Dispatch<EnemyAction|BulletAction>
     dispatch({type: ActionTypes.SPAWN_ENEMY, spawn: makeEnemy(type, xPos, yPos, scale, health)})
   },
   enemiesReceiveBullet: ({bulletIdx, enemies} : {bulletIdx : number, enemies: Array<number>}) => {
-    enemies.forEach(enemyIdx => dispatch({type: ActionTypes.ENEMY_RECEIVES_BULLET, enemyIdx: enemyIdx, bulletIdx: bulletIdx}));
+    enemies.forEach(enemyIdx => {
+      dispatch({type: ActionTypes.ENEMY_RECEIVES_BULLET, enemyIdx: enemyIdx, bulletIdx: bulletIdx});
+    });
+    dispatch({type: ActionTypes.REMOVE_BULLET, bulletType: "bullets", bulletIdx: bulletIdx});
   }
 });
 
@@ -93,14 +97,15 @@ export const explosionActionCreator = (dispatch : Dispatch<ExplosionAction>) => 
 })
 
 export const bulletActionCreator = (dispatch : Dispatch<BulletAction>) => ({
-  spawnBullet: (pieuwer : PieuwerState) =>  {
-    if (pieuwer.shooting) {
-      const trajectory = (pieuwer.angle - 90) * (Math.PI / 180);
+  spawnBullet: <T extends PieuwerState>(thing : T) =>  {
+    if (thing.shooting) {
+      const trajectory = ("enemyType" in thing ?  (thing.angle + 90) : (thing.angle - 90)) * (Math.PI / 180);
       dispatch({
         type: ActionTypes.SPAWN_BULLET,
-        xPos: pieuwer.pos.x + Math.cos(trajectory) * 120,
-        yPos: pieuwer.pos.y + Math.sin(trajectory) * 120,
-        trajectory: trajectory
+        xPos: thing.pos.x + Math.cos(trajectory) * 120,
+        yPos: thing.pos.y + Math.sin(trajectory) * 120,
+        trajectory: trajectory,
+        bulletType: "enemyType" in thing ? "enemyBullets" : "bullets"
       });
     }
   }

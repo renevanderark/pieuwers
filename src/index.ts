@@ -14,7 +14,7 @@ import { keyActionCreator, bulletActionCreator, enemyActionCreator, explosionAct
 import { ActionTypes } from './actions/action-types';
 
 import { Point } from './phyz/shapes';
-import { detectBulletToEnemyCollisions, detectPieuwerToEnemyCollisions, PieuwerToEnemyCollisions } from './phyz/collisions';
+import { detectBulletToEnemyCollisions, detectPieuwerToEnemyCollisions, PieuwerToEnemyCollisions, detectEnemyBulletToPieuwerCollisions } from './phyz/collisions';
 import { PieuwerKey } from './store/pieuwer-reducer';
 import { EnemyType } from './enemies/types';
 
@@ -78,6 +78,14 @@ const handleBulletEnemyCollision = (params : {bulletIdx : number, enemies: Array
   spawnExplosion(params.collsionPos, 8);
 }
 
+const handleBulletPieuwerCollision = (params : { bulletIdx : number, pieuwerKeys : Array<string>, collsionPos : Point}) => {
+  store.dispatch({type: ActionTypes.REMOVE_BULLET, bulletType: "enemyBullets", bulletIdx: params.bulletIdx})
+  params.pieuwerKeys.forEach(pieuwerKey => {
+    store.dispatch({type: ActionTypes.PIEUWER_COLLIDES, player: pieuwerKey});
+  });
+  spawnExplosion(params.collsionPos, 6);
+}
+
 const handlePieuwerToEnemyCollisions = (collisions : PieuwerToEnemyCollisions) => {
   Object.keys(collisions).filter(pieuwerKey => collisions[pieuwerKey].length > 0)
     .forEach(pieuwerKey => store.dispatch({type: ActionTypes.PIEUWER_COLLIDES, player: pieuwerKey}));
@@ -99,6 +107,7 @@ const game = () => {
     mainFrameRenderer.clear();
     mainFrameRenderer.render(
       bulletStates.bullets.map(drawBullet).concat(
+      bulletStates.enemyBullets.map(drawBullet)).concat(
       explosionStates.explosions.map(drawExplosion)).concat(
       enemyStates.enemies.map(drawEnemy).concat(
       [
@@ -117,22 +126,35 @@ const game = () => {
   };
 
 
-  for (let i = 0; i < 16; i++) {
-    setTimeout(() => spawnEnemy(EnemyType.SKULL, -100, -100, 0.75, 30), i * 500);
-    setTimeout(() => spawnEnemy(EnemyType.ENEMY_TWO, VIRT_WIDTH / 2, VIRT_HEIGHT / 2, 1, 10), i * 750);
+  for (let i = 0; i < 12; i++) {
+    setTimeout(() => spawnEnemy(EnemyType.SKULL, VIRT_WIDTH / 2, -VIRT_HEIGHT / 3, 0.75, 20), i * 250);
   }
-  setTimeout(() => spawnEnemy(EnemyType.SKULL_BOSS, VIRT_WIDTH / 2, VIRT_HEIGHT / 2, 4, 150), 10);
+
+  for (let i = 0; i < 4; i++) {
+    spawnEnemy(EnemyType.ENEMY_TWO, (VIRT_WIDTH / 8) + i * (VIRT_WIDTH / 4), -VIRT_HEIGHT / 3, 1, 10);
+  }
+
+  //setTimeout(() => spawnEnemy(EnemyType.SKULL_BOSS, VIRT_WIDTH / 2, VIRT_HEIGHT / 3, 4, 150), 12000);
 
   let uploopinterval : number, bulletInterval : number;
   const updateLoop = () => {
 
-
     store.dispatch({type: ActionTypes.UPDATE});
-    detectBulletToEnemyCollisions(store.getState())
-      .forEach(handleBulletEnemyCollision);
-    handlePieuwerToEnemyCollisions(detectPieuwerToEnemyCollisions(store.getState()));
 
-    if (store.getState().pieuwerStates.pieuwerOne.health < 0 || store.getState().pieuwerStates.pieuwerTwo.health < 0) {
+    const gameState = store.getState();
+
+    detectBulletToEnemyCollisions(gameState)
+      .forEach(handleBulletEnemyCollision);
+
+    detectEnemyBulletToPieuwerCollisions(gameState)
+      .forEach(handleBulletPieuwerCollision);
+
+    handlePieuwerToEnemyCollisions(detectPieuwerToEnemyCollisions(gameState));
+
+
+    gameState.enemyStates.enemies.forEach(spawnBullet);
+
+    if (gameState.pieuwerStates.pieuwerOne.health < 0 || gameState.pieuwerStates.pieuwerTwo.health < 0) {
       mainLayer.style.opacity = "0";
       gameOver = true;
       clearInterval(uploopinterval);
@@ -140,7 +162,7 @@ const game = () => {
       document.body.innerHTML = `<div style="color: white; text-align: center">BOEM! GAME OVER</div>`;
       setTimeout(() => location.reload(), 3000);
     }
-    if (store.getState().enemyStates.enemies.length === 0) {
+    if (gameState.enemyStates.enemies.length === 0) {
       mainLayer.style.opacity = "0";
       gameOver = true;
       clearInterval(uploopinterval);

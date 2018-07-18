@@ -23,13 +23,13 @@ const pointWithinBoundingBox = <S extends PieuwerState>(pos : Point, thing : S) 
       -thing.angle  * Math.PI / 180
     ), getBoundingBox(thing))
 
-const enemyCollidesWithBullet = (bullet : BulletState, enemy: EnemyState) : boolean =>
-    pointWithinBoundingBox(bullet.pos, enemy) &&
+const thingCollidesWithBullet = <T extends PieuwerState>(bullet : BulletState, thing: T) : boolean =>
+    pointWithinBoundingBox(bullet.pos, thing) &&
     pointWithinAreaList(
       rotateAroundOrigin(
-        translateToOrigin(bullet.pos, enemy.pos),
-        -enemy.angle * Math.PI / 180),
-      enemy.collisionShapes
+        translateToOrigin(bullet.pos, thing.pos),
+        -thing.angle * Math.PI / 180),
+      thing.collisionShapes
     );
 
 /* PREMATURE OPTIM.
@@ -42,11 +42,22 @@ export const detectBulletToEnemyCollisions : (s : GameState) => Array<{enemies: 
   bullets.map((bullet, bulletIdx) => ({
     enemies: /* (collisionGrid[bulletToCollisionKey(bullet)]||[]) */
       enemies.map((en, idx) => idx)
-      .filter((enemyIdx) => enemyCollidesWithBullet(bullet, enemies[enemyIdx])),
+      .filter((enemyIdx) => thingCollidesWithBullet(bullet, enemies[enemyIdx])),
     bulletIdx: bulletIdx,
     collsionPos: { x: bullet.pos.x, y: bullet.pos.y }
   }))
   .filter(({enemies, bulletIdx}) => enemies.length > 0)
+
+export const detectEnemyBulletToPieuwerCollisions : (s : GameState) => Array<{pieuwerKeys: Array<string>, bulletIdx : number, collsionPos: Point}> =
+  ({ bulletStates : { enemyBullets }, pieuwerStates }) =>
+  enemyBullets.map((bullet, bulletIdx) => ({
+    pieuwerKeys: ["pieuwerOne", "pieuwerTwo"]
+      .filter(pieuwerKey => thingCollidesWithBullet(bullet, pieuwerStates[pieuwerKey])),
+    bulletIdx: bulletIdx,
+    collsionPos: { x: bullet.pos.x, y: bullet.pos.y }
+  }))
+  .filter(({pieuwerKeys, bulletIdx}) => pieuwerKeys.length > 0);
+
 
 const getBoundingBoxCollisionsForPieuwer = (pieuwer : PieuwerState, enemies : Array<EnemyState>) : Array<number> =>
   rotateBoxAroundOrigin(getBoundingBox(pieuwer), pieuwer.angle * Math.PI / 180)
