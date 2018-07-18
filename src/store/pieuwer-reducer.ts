@@ -104,7 +104,6 @@ const initialState : MultiPieuwerState  = {
   ])
 )
 };
-console.log(initialState.pieuwerOne.collisionShapes);
 
 const updatePieuwerState = (pieuwerState : PieuwerState) : PieuwerState => ({
     ...pieuwerState,
