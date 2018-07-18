@@ -16,7 +16,7 @@ import { ActionTypes } from './actions/action-types';
 import { Point } from './phyz/shapes';
 import { detectBulletToEnemyCollisions, detectPieuwerToEnemyCollisions, PieuwerToEnemyCollisions } from './phyz/collisions';
 import { PieuwerKey } from './store/pieuwer-reducer';
-import { EnemyType } from './store/enemy-reducer';
+import { EnemyType } from './enemies/types';
 
 const store = createStore(combineReducers(reducers));
 

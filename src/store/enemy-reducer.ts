@@ -4,10 +4,8 @@ import { EnemyAction } from "../actions/action-creators";
 import { VIRT_HEIGHT, VIRT_WIDTH } from "./constants";
 import { pointWithinBox } from "../phyz/boxes";
 import { Box } from "../phyz/shapes";
-
-export enum EnemyType {
-  SKULL, SKULL_BOSS, ENEMY_TWO
-}
+import { EnemyType } from "../enemies/types";
+import { fly } from "../enemies/enemy-fly-behaviours";
 
 export interface EnemyState extends PieuwerState {
   maxHealth: number
@@ -19,24 +17,9 @@ export interface MultiEnemyState {
   enemies: Array<EnemyState>
 }
 
-
-
 const initialState : MultiEnemyState =  {
   enemies: [],
 }
-
-const fly = (enemyState : EnemyState) : EnemyState => ({
-  ...enemyState,
-  collided: false,
-  pos: enemyState.enemyType === EnemyType.SKULL ? {
-    x: VIRT_WIDTH/2 - Math.cos(enemyState.angle*4 * Math.PI / 180) * VIRT_WIDTH / 2,
-    y: VIRT_HEIGHT/2 - Math.sin(enemyState.angle * Math.PI / 180) * VIRT_WIDTH / 5
-  } : {
-    x: VIRT_WIDTH/2,
-    y: VIRT_HEIGHT/2 -Math.sin(enemyState.angle*4 * Math.PI / 180) * VIRT_WIDTH / 5
-  },
-  angle: enemyState.angle + 0.1 >= 360 ? 0 : enemyState.angle + 0.1
-});
 
 export default function(state : MultiEnemyState, action : EnemyAction) : MultiEnemyState {
   if (typeof state === 'undefined') {

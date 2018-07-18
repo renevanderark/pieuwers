@@ -1,10 +1,12 @@
 import { Dispatch, AnyAction } from "redux";
 import { ActionTypes } from "./action-types";
 import { PieuwerControl, PieuwerKey, PieuwerState } from "../store/pieuwer-reducer";
-import { EnemyState, EnemyType } from "../store/enemy-reducer";
+import { EnemyState } from "../store/enemy-reducer";
 import { Point, isBox } from "../phyz/shapes";
-import { ENEMY_WIDTH, ENEMY_HEIGHT } from "../store/constants";
 import { PieuwerToEnemyCollisions } from "../phyz/collisions";
+import { EnemyType } from "../enemies/types";
+import { makeEnemyCollisionShapes } from "../enemies/enemy-collision-shapes";
+import { makeEnemy } from "../enemies/enemy-creator";
 
 
 
@@ -74,62 +76,6 @@ export interface CollisionAction {
   collisions: PieuwerToEnemyCollisions
 }
 
-
-const makeEnemy = (type : EnemyType, xPos : number, yPos : number, size: Point, health? : number) : EnemyState => ({
-  enemyType: type,
-  accelerateLeft: false, accelerateRight: false,
-  accelerateUp: false, accelerateDown: false,
-  angle: 0, ySpeed: 0, shooting: false,
-  axisX: null, axisY: null,
-  size: size,
-  collisionShapes: type === EnemyType.SKULL_BOSS || type === EnemyType.SKULL ? [
-    {
-      x: (4 -  (ENEMY_WIDTH  / 2)) * (size.x / ENEMY_WIDTH),
-      y: (63 - (ENEMY_HEIGHT / 2)) * (size.y / ENEMY_HEIGHT),
-      w: 26 * (size.x / ENEMY_WIDTH),
-      h: 95 * (size.y / ENEMY_HEIGHT)
-    },
-    {
-      x: (30 -  (ENEMY_WIDTH  / 2)) * (size.x / ENEMY_WIDTH),
-      y: (63 - (ENEMY_HEIGHT / 2)) * (size.y / ENEMY_HEIGHT),
-      w: 51 * (size.x / ENEMY_WIDTH),
-      h: 82 * (size.y / ENEMY_HEIGHT)
-    },
-    {
-      x: (58 -  (ENEMY_WIDTH  / 2)) * (size.x / ENEMY_WIDTH),
-      y: (42 - (ENEMY_HEIGHT / 2)) * (size.y / ENEMY_HEIGHT),
-      radius: 40 * (size.x / ENEMY_WIDTH)
-    },
-    {
-      x: (27 -  (ENEMY_WIDTH  / 2)) * (size.x / ENEMY_WIDTH),
-      y: (50 - (ENEMY_HEIGHT / 2)) * (size.y / ENEMY_HEIGHT),
-      radius: 20 * (size.x / ENEMY_WIDTH)
-    }
-  ] : [
-    {x:-5,y:-55,radius: 65},
-    {x:-74,y:-55,w: 135,h:150},
-    {x:-165,y:58,w: 315,h:50},
-    {x:-150,y:38,w: 285,h:20},
-    {x:-135,y:18,w: 255,h:20},
-    {x:-145,y:120,radius: 35},
-    {x:130,y:120,radius: 35},
-  ].map(shape => isBox(shape) ?
-    {
-      x: (shape.x / 4) * (size.x / ENEMY_WIDTH),
-      y: (shape.y / 4) * (size.x / ENEMY_WIDTH),
-      w: (shape.w / 4) * (size.x / ENEMY_WIDTH),
-      h: (shape.h / 4) * (size.x / ENEMY_WIDTH)
-    } :
-    {
-      x: (shape.x / 4) * (size.x / ENEMY_WIDTH),
-      y: (shape.y / 4) * (size.x / ENEMY_WIDTH),
-      radius: (shape.radius / 4) * (size.x / ENEMY_WIDTH),
-    }
-  ),
-  health: health || 4, maxHealth: health || 4,
-  pos: {y: yPos, x: xPos},
-  collided: false
-});
 
 export const enemyActionCreator = (dispatch : Dispatch<EnemyAction|BulletAction>) => ({
   spawnEnemy: (type: EnemyType, xPos : number, yPos : number, size: Point, health? : number) => {

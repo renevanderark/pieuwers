@@ -1,12 +1,14 @@
 import { BulletState } from "./store/bullet-reducer";
 import { Drawable } from "./resizable-canvas/drawable";
 import { PieuwerState, PieuwerKey } from "./store/pieuwer-reducer";
-import { EnemyState, EnemyType } from "./store/enemy-reducer";
+import { EnemyState } from "./store/enemy-reducer";
 import { ExplosionState } from "./store/explosion-reducer";
 import { isBox, Box, Circle, Point, getBoundingBox } from "./phyz/shapes";
-import { ENEMY_WIDTH, ENEMY_HEIGHT, PIEUWER_WIDTH, PIEUWER_HEIGHT } from "./store/constants";
+import { PIEUWER_WIDTH, PIEUWER_HEIGHT } from "./store/constants";
 import { rotateBoxAroundOrigin, translateToOrigin, rotateAroundOrigin } from "./phyz/shape-ops";
 import { CollisionList } from "./phyz/collisions";
+import { EnemyType } from "./enemies/types";
+import { ENEMY_BOUNDS } from "./enemies/enemy-bounding-boxes";
 
 
 const pieuwerOnePng = new Image();
@@ -48,6 +50,7 @@ const drawBox = (shape : Box, ctx: CanvasRenderingContext2D, scale: number, pos 
 }
 
 const drawCollisionShapes = (ctx: CanvasRenderingContext2D, scale: number, collisionShapes : Array<Circle|Box>, pos : Point, angle : number) => {
+  ctx.strokeStyle = "white"
   collisionShapes.forEach(shape => {
     if (isBox(shape)) {
       drawBox(<Box>shape, ctx, scale, pos, angle);
@@ -117,13 +120,12 @@ export const drawEnemy = (enemy : EnemyState) : Drawable =>
     ctx.rotate(enemy.angle * Math.PI / 180);
     //ctx.globalAlpha = (enemy.health / enemy.maxHealth) * 0.5 + 0.5;
     ctx.strokeStyle = "white";
-    ctx.drawImage(enemy.enemyType === EnemyType.ENEMY_TWO ?enemy2Png :enemyPng,0,0, ENEMY_WIDTH, ENEMY_HEIGHT,
+    ctx.drawImage(enemy.enemyType === EnemyType.ENEMY_TWO ? enemy2Png :enemyPng,0,0, ENEMY_BOUNDS[enemy.enemyType].x,  ENEMY_BOUNDS[enemy.enemyType].y,
       -(enemy.size.x / 2) * scale,
       -(enemy.size.y / 2) * scale,
       enemy.size.x * scale,
       enemy.size.y * scale);
     ctx.restore();
-    //ctx.strokeStyle = "white"
     //drawCollisionShapes(ctx, scale, enemy.collisionShapes, enemy.pos, enemy.angle);
     //drawBox(getBoundingBox(enemy), ctx, scale, enemy.pos, enemy.angle, enemy.collided ? "red" : "rgb(128,128,255)");
   };
