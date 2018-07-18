@@ -45,37 +45,25 @@ const drawCollisionShapes = (ctx: CanvasRenderingContext2D, scale: number, colli
   });
 }
 
-export const drawPieuwer = (pieuwerKey : PieuwerKey, ps : PieuwerState) : Drawable =>
+const drawThing = <T extends PieuwerState>(thing : T, img : HTMLImageElement, imgDims : Point) : Drawable =>
   (ctx: CanvasRenderingContext2D, scale: number) => {
     ctx.save();
-    ctx.translate(ps.pos.x * scale, ps.pos.y * scale);
-    ctx.rotate(ps.angle * Math.PI / 180);
-    ctx.drawImage(pieuwerPngs[pieuwerKey], 0, 0,
-      ps.size.x, ps.size.y,
-      -(ps.size.x / 2)*scale, -(ps.size.y / 2)*scale,
-      ps.size.x * scale, ps.size.y * scale);
-    drawCollisionShapes(ctx, scale, ps.collisionShapes);
-    //drawBox(getBoundingBox(ps), ctx, scale, ps.pos, ps.angle, ps.collided ? "red" : "rgb(128,128,255)");
+    ctx.translate(thing.pos.x * scale, thing.pos.y * scale);
+    ctx.rotate(thing.angle * Math.PI / 180);
+    ctx.drawImage(img, 0, 0,
+      imgDims.x, imgDims.y,
+      -(thing.size.x / 2)*scale, -(thing.size.y / 2)*scale,
+      thing.size.x * scale, thing.size.y * scale);
+    //drawCollisionShapes(ctx, scale, thing.collisionShapes);    
     ctx.restore();
   };
 
+export const drawPieuwer = (pieuwerKey : PieuwerKey, ps : PieuwerState) : Drawable =>
+    drawThing(ps, pieuwerPngs[pieuwerKey], ps.size);
+
 export const drawEnemy = (enemy : EnemyState) : Drawable =>
-  (ctx: CanvasRenderingContext2D, scale: number) => {
-    ctx.save();
-    ctx.translate(enemy.pos.x * scale, enemy.pos.y * scale);
-    ctx.rotate(enemy.angle * Math.PI / 180);
-    //ctx.globalAlpha = (enemy.health / enemy.maxHealth) * 0.5 + 0.5;
-    ctx.strokeStyle = "white";
-    ctx.drawImage(enemySprites[enemy.enemyType],0,0,
-      ENEMY_BOUNDS[enemy.enemyType].x,  ENEMY_BOUNDS[enemy.enemyType].y,
-      -(enemy.size.x / 2) * scale,
-      -(enemy.size.y / 2) * scale,
-      enemy.size.x * scale,
-      enemy.size.y * scale);
-    drawCollisionShapes(ctx, scale, enemy.collisionShapes);
-    //drawBox(getBoundingBox(enemy), ctx, scale, enemy.pos, enemy.angle, enemy.collided ? "red" : "rgb(128,128,255)");
-    ctx.restore();
-  };
+    drawThing(enemy, enemySprites[enemy.enemyType], ENEMY_BOUNDS[enemy.enemyType]);
+
 
 export const drawCollisions = <T extends PieuwerState>(thing : T, collisions: Array<CollisionList>) : Drawable =>
   (ctx: CanvasRenderingContext2D, scale: number) => {
@@ -88,7 +76,10 @@ export const drawCollisions = <T extends PieuwerState>(thing : T, collisions: Ar
           collidingCorners.forEach(pointIndex => {
             const tl = translateToOrigin(thing.pos, points[pointIndex]);
             ctx.beginPath();
-            ctx.arc(tl.x * scale, tl.y * scale, Math.random() * 20 * scale, 0, Math.PI*2);
+            ctx.arc(
+              tl.x * scale,
+              tl.y * scale,
+              Math.random() * 20 * scale, 0, Math.PI*2);
             ctx.fill();
           })
         } else {
