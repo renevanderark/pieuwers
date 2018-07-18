@@ -11,7 +11,6 @@
   "license": "MIT",
   "devDependencies": {
     "awesome-typescript-loader": "^5.2.0",
-    "padevents": "^0.1.1",
     "redux": "^4.0.0",
     "typescript": "^2.9.2",
     "webpack": "^4.15.1",
