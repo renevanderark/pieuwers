@@ -2,7 +2,7 @@ import { Dispatch, AnyAction } from "redux";
 import { ActionTypes } from "./action-types";
 import { PieuwerControl, PieuwerKey, PieuwerState } from "../store/pieuwer-reducer";
 import { EnemyState, EnemyType } from "../store/enemy-reducer";
-import { Point } from "../phyz/shapes";
+import { Point, isBox } from "../phyz/shapes";
 import { ENEMY_WIDTH, ENEMY_HEIGHT } from "../store/constants";
 import { PieuwerToEnemyCollisions } from "../phyz/collisions";
 
@@ -105,7 +105,7 @@ const makeEnemy = (type : EnemyType, xPos : number, yPos : number, size: Point, 
       y: (50 - (ENEMY_HEIGHT / 2)) * (size.y / ENEMY_HEIGHT),
       radius: 20 * (size.x / ENEMY_WIDTH)
     }
-  ] : [ // FIXME: =not scaled to any other width than: 400!!!
+  ] : [
     {x:-5,y:-55,radius: 65},
     {x:-74,y:-55,w: 135,h:150},
     {x:-165,y:58,w: 315,h:50},
@@ -113,8 +113,19 @@ const makeEnemy = (type : EnemyType, xPos : number, yPos : number, size: Point, 
     {x:-135,y:18,w: 255,h:20},
     {x:-145,y:120,radius: 35},
     {x:130,y:120,radius: 35},
-
-  ],
+  ].map(shape => isBox(shape) ?
+    {
+      x: (shape.x / 4) * (size.x / ENEMY_WIDTH),
+      y: (shape.y / 4) * (size.x / ENEMY_WIDTH),
+      w: (shape.w / 4) * (size.x / ENEMY_WIDTH),
+      h: (shape.h / 4) * (size.x / ENEMY_WIDTH)
+    } :
+    {
+      x: (shape.x / 4) * (size.x / ENEMY_WIDTH),
+      y: (shape.y / 4) * (size.x / ENEMY_WIDTH),
+      radius: (shape.radius / 4) * (size.x / ENEMY_WIDTH),
+    }
+  ),
   health: health || 4, maxHealth: health || 4,
   pos: {y: yPos, x: xPos},
   collided: false
