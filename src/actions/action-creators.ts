@@ -7,6 +7,7 @@ import { PieuwerToEnemyCollisions } from "../phyz/collisions";
 import { EnemyType } from "../enemies/types";
 import { makeEnemyCollisionShapes } from "../enemies/enemy-collision-shapes";
 import { makeEnemy } from "../enemies/enemy-creator";
+import { Thing } from "../store/thing";
 
 
 
@@ -97,7 +98,7 @@ export const explosionActionCreator = (dispatch : Dispatch<ExplosionAction>) => 
 })
 
 export const bulletActionCreator = (dispatch : Dispatch<BulletAction>) => ({
-  spawnBullet: <T extends PieuwerState>(thing : T) =>  {
+  spawnBullet: <T extends Thing>(thing : T) =>  {
     if (thing.shooting) {
       const trajectory = ("enemyType" in thing ?  (thing.angle + 90) : (thing.angle - 90)) * (Math.PI / 180);
       dispatch({

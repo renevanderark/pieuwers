@@ -4,6 +4,7 @@ import { VIRT_WIDTH, VIRT_HEIGHT, PIEUWER_WIDTH, PIEUWER_HEIGHT } from "./consta
 import { KeyAction } from "../actions/action-creators";
 import { Point, Box, Circle } from "../phyz/shapes";
 import { guardNumber } from "../phyz/guard-number";
+import { Thing } from "./thing";
 
 const yAcceleration = 0.25;
 const maxYSpeed = 5;
@@ -21,21 +22,14 @@ export enum PieuwerControl {
 }
 
 
-export interface PieuwerState {
+export interface PieuwerState extends Thing {
   axisY: number
   axisX: number
   accelerateUp: boolean
   accelerateDown: boolean
   accelerateLeft: boolean
   accelerateRight: boolean
-  collisionShapes: Array<Box|Circle>
-  angle: number
   ySpeed: number
-  pos: Point
-  size: Point
-  shooting: boolean
-  health: number
-  maxHealth: number
 }
 
 export interface MultiPieuwerState {

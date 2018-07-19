@@ -10,6 +10,7 @@ import { CollisionList } from "./phyz/collisions";
 import { EnemyType } from "./enemies/types";
 import { ENEMY_BOUNDS } from "./enemies/enemy-bounding-boxes";
 import { enemySprites } from "./enemies/enemy-sprites";
+import { Thing } from "./store/thing";
 
 
 const pieuwerOnePng = new Image();
@@ -61,7 +62,7 @@ const getImage = (img : HTMLImageElement, imgDims: Point, targetRect: Point) : H
   return imgCache[imgKey];
 }
 
-const drawThing = <T extends PieuwerState>(thing : T, img : HTMLImageElement, imgDims : Point) : Drawable =>
+const drawThing = <T extends Thing>(thing : T, img : HTMLImageElement, imgDims : Point) : Drawable =>
   (ctx: CanvasRenderingContext2D, scale: number) => {
     ctx.save();
     ctx.translate(Math.floor(thing.pos.x * scale), Math.floor(thing.pos.y * scale));
@@ -89,7 +90,7 @@ export const drawEnemy = (enemy : EnemyState) : Drawable =>
     drawThing(enemy, enemySprites[enemy.enemyType], ENEMY_BOUNDS[enemy.enemyType]);
 
 
-export const drawCollisions = <T extends PieuwerState>(thing : T, collisions: Array<CollisionList>) : Drawable =>
+export const drawCollisions = (thing : Thing, collisions: Array<CollisionList>) : Drawable =>
   (ctx: CanvasRenderingContext2D, scale: number) => {
     ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
     collisions.forEach((collisionList) => {

@@ -6,8 +6,9 @@ import { pointWithinBox } from "../phyz/boxes";
 import { Box, Point } from "../phyz/shapes";
 import { EnemyType } from "../enemies/types";
 import { fly } from "../enemies/enemy-fly-behaviours";
+import { Thing } from "./thing";
 
-export interface EnemyState extends PieuwerState {
+export interface EnemyState extends Thing {
   enemyType: EnemyType
   startPos: Point
   trajectory: number

@@ -1,4 +1,5 @@
 import { PieuwerState } from "../store/pieuwer-reducer";
+import { Thing } from "../store/thing";
 
 export interface Point {
   x: number,
@@ -18,7 +19,7 @@ export const isBox = <S extends Point>(shape : S) => 'w' in shape;
 export const isCircle = <S extends Point>(shape : S) => 'radius' in shape;
 
 
-export const getBoundingBox = <S extends PieuwerState>(thing : S) : Box => ({
+export const getBoundingBox = (thing : Thing) : Box => ({
   x: -thing.size.x / 2,
   y: -thing.size.y / 2,
   w: thing.size.x,

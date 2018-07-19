@@ -5,6 +5,7 @@ import { Point, Box, Circle, isBox, getBoundingBox } from "./shapes";
 import { pointWithinBox } from "./boxes";
 import { translateToOrigin, rotateAroundOrigin, rotateBoxAroundOrigin} from "./shape-ops";
 import { PieuwerKey, PieuwerState } from "../store/pieuwer-reducer";
+import { Thing } from "../store/thing";
 
 const pointWithinCircle = (pos : Point, c : Circle) : boolean =>
   Math.sqrt(Math.pow(pos.x - c.x, 2) + Math.pow(pos.y - c.y, 2)) <= c.radius;
@@ -16,14 +17,14 @@ const pointWithinAreaList = (p : Point, shapes : Array<Circle|Box>) : boolean =>
 
 
 
-const pointWithinBoundingBox = <S extends PieuwerState>(pos : Point, thing : S) : boolean =>
+const pointWithinBoundingBox = (pos : Point, thing : Thing) : boolean =>
   pointWithinBox(
     rotateAroundOrigin(
       translateToOrigin(pos, thing.pos),
       -thing.angle  * Math.PI / 180
     ), getBoundingBox(thing))
 
-const thingCollidesWithBullet = <T extends PieuwerState>(bullet : BulletState, thing: T) : boolean =>
+const thingCollidesWithBullet = (bullet : BulletState, thing: Thing) : boolean =>
     pointWithinBoundingBox(bullet.pos, thing) &&
     pointWithinAreaList(
       rotateAroundOrigin(
@@ -101,7 +102,7 @@ export interface ShapeCollisions {
   collidingEnemyCorners: CollisionList
 }
 
-const getCollidingCorners = <T extends PieuwerState>(thing1 : T, thing2 : T) : Array<Array<boolean>> =>
+const getCollidingCorners = (thing1 : Thing, thing2 : Thing) : Array<Array<boolean>> =>
   thing1.collisionShapes.map(shape => {
     if (isBox(shape)) {
       return rotateBoxAroundOrigin(<Box>shape, (thing1.angle+180) * Math.PI / 180)
