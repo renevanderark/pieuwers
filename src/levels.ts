@@ -24,10 +24,10 @@ const mkEnemy2 = (health : number, pos: Point) : EnemySpawnParams => ({
 });
 
 const mkMultiLaser = (health : number, pos: Point) : EnemySpawnParams => ({
-  type: EnemyType.ENEMY_TWO,
+  type: EnemyType.MULTI_LASER,
   flyBehaviour: FlyBehaviour.PointAtClosestPieuwer,
   pos: pos,
-  scale: 1,
+  scale: 2,
   health:  health,
   fireType: FireType.LASER
 });
@@ -48,9 +48,10 @@ export const level1 = (spawnEnemy : (p : EnemySpawnParams) => void) => [
   },
   () => {
     for (let i = 0; i < 12; i++) {
-      setTimeout(() => spawnEnemy(mkSkull(10)), i * 250);
+      setTimeout(() => spawnEnemy(mkSkull(20)), i * 250);
     }
-    spawnEnemy(mkMultiLaser(20, {x: VIRT_WIDTH / 2, y: -VIRT_HEIGHT / 3}));
+    spawnEnemy(mkMultiLaser(150, {x: VIRT_WIDTH / 2 - VIRT_WIDTH / 4, y: -VIRT_HEIGHT / 3}));
+    spawnEnemy(mkMultiLaser(150, {x: VIRT_WIDTH / 2 + VIRT_WIDTH / 4, y: -VIRT_HEIGHT / 3}));
   },
   () => {
     for (let i = 0; i < 15; i++) {

@@ -62,17 +62,19 @@ const flyBehaviours : {[key in FlyBehaviour]: (enemyState : EnemyState, spawnCen
     return {
       ...enemyState,
       pos: {
-        x: withinFiringRange
+        x:  enemyState.pos.y > enemyState.size.y / 2
+          ? target.x >= enemyState.pos.x - 30 && target.x <= enemyState.pos.x + 30
             ? enemyState.pos.x
             : target.x < enemyState.pos.x
             ?  enemyState.pos.x - 2
-            : enemyState.pos.x + 2,
+            : enemyState.pos.x + 2
+          : enemyState.pos.x,
         y:  spawnCentral.y - VIRT_HEIGHT / 3
       },
       shooting: withinFiringRange && enemyState.shootTimer <= 0 ? true : false,
       shootTimer: withinFiringRange
         ? enemyState.shootTimer <= 0 ? 0  : enemyState.shootTimer - 1
-        : 200
+        : 100
     }
   }
 }

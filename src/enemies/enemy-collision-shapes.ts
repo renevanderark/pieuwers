@@ -87,17 +87,18 @@ export const makeEnemyCollisionShapes : {[key : string]: (scale : number) => Arr
   [EnemyType.ENEMY_TWO]: makeEnemyTwoShapes,
   [EnemyType.MULTI_LASER]: (scale) => [
     {x: -37 * scale, y: -25 * scale, w: 32 * scale, h: 30 * scale},
-    {x: -5 * scale, y: -28 * scale, w: 42 * scale, h: 34 * scale},
+    {x: -5 * scale,  y: -28 * scale, w: 42 * scale, h: 34 * scale},
     {x: -10 * scale, y: 0, w: 20 * scale, h: 30 * scale},
-    {x: 37 * scale, y: -20, w: 5 * scale, h: 13 * scale},
-    {x: -38 * scale, y: 40, w: 4 * scale, h: 16 * scale},
-    {x: -42 * scale, y: 40, w: 4 * scale, h: 11 * scale},
-    {x: -46 * scale, y: 20, w: 4 * scale, h: 10 * scale},
+    {x: 37 * scale,  y: -5 * scale, w: 5 * scale, h: 13 * scale},
+    {x: -38 * scale, y: 10 * scale, w: 4 * scale, h: 16 * scale},
+    {x: -42 * scale, y: 10 * scale, w: 4 * scale, h: 11 * scale},
+    {x: -46 * scale, y: 5 * scale, w: 4 * scale, h: 10 * scale},
     {x: -50 * scale, y: 0, w: 10 * scale, h: 4 * scale},
-    {x: 37 * scale, y: -20, radius: 10 * scale},
-    {x: 32 * scale, y: -14 * scale, radius: 14 * scale},
+
+    {x: 37 * scale,  y: -20, radius: 10 * scale},
+    {x: 32 * scale,  y: -14 * scale, radius: 14 * scale},
     {x: -16 * scale, y: 16 * scale, radius: 14 * scale},
-    {x: 16 * scale, y: 14 * scale, radius: 12 * scale},
-    {x: -33 * scale, y: -5, radius: 13 * scale},
+    {x: 16 * scale,  y: 14 * scale, radius: 12 * scale},
+    {x: -33 * scale, y: -5 * scale, radius: 13 * scale},
   ]
 }

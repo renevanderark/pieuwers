@@ -97,7 +97,7 @@ const drawThing = <T extends Thing>(thing : T, img : HTMLImageElement, imgDims :
         ctx.arc(
           Math.floor((thing.pos.x - Math.random() * 4) * scale),
           Math.floor((thing.pos.y + thing.size.y / 2) * scale),
-          Math.random() * (200-thing.shootTimer) * 0.5 * scale, 0, Math.PI*2);
+          Math.random() * (100-thing.shootTimer) * scale, 0, Math.PI*2);
         ctx.fill();
       }
     }
