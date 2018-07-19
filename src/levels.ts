@@ -1,32 +1,51 @@
 import { EnemyType } from "./enemies/types";
 import { VIRT_WIDTH, VIRT_HEIGHT } from "./store/constants";
+import { EnemySpawnParams } from "./enemies/enemy-creator";
+import { FlyBehaviour } from "./enemies/enemy-fly-behaviours";
+import { Point } from "./phyz/shapes";
 
-export const level1 = (spawnEnemy : (t : EnemyType, x : number, y : number, s :number, h : number) => void) => [
+const mkSkull = (health : number, flyBehaviour? : FlyBehaviour, scale? : number) : EnemySpawnParams => ({
+  type: EnemyType.SKULL,
+  flyBehaviour: flyBehaviour || FlyBehaviour.DefensiveSlides,
+  pos: {x: VIRT_WIDTH / 2, y: -VIRT_HEIGHT / 3},
+  scale: scale || 0.75,
+  health:  health
+});
+
+const mkEnemy2 = (health : number, pos: Point) : EnemySpawnParams => ({
+  type: EnemyType.ENEMY_TWO,
+  flyBehaviour: FlyBehaviour.HorizontalQuarterHover,
+  pos: pos,
+  scale: 1,
+  health:  health
+});
+
+export const level1 = (spawnEnemy : (p : EnemySpawnParams) => void) => [
   () => {
     for (let i = 0; i < 16; i++) {
-      setTimeout(() => spawnEnemy(EnemyType.SKULL, VIRT_WIDTH / 2, -VIRT_HEIGHT / 3, 0.75, 5), i * 250);
+      setTimeout(() => spawnEnemy(mkSkull(5)), i * 250);
     }
   },
   () => {
     for (let i = 0; i < 12; i++) {
-      setTimeout(() => spawnEnemy(EnemyType.SKULL, VIRT_WIDTH / 2, -VIRT_HEIGHT / 3, 0.75, 10), i * 250);
+      setTimeout(() => spawnEnemy(mkSkull(10)), i * 250);
     }
     for (let i = 0; i < 4; i++) {
-      spawnEnemy(EnemyType.ENEMY_TWO, (VIRT_WIDTH / 8) + i * (VIRT_WIDTH / 4), -VIRT_HEIGHT / 3, 1, 5);
+      spawnEnemy(mkEnemy2(5, {x: (VIRT_WIDTH / 8) + i * (VIRT_WIDTH / 4), y: -VIRT_HEIGHT / 3}));
     }
   },
   () => {
     for (let i = 0; i < 12; i++) {
-      setTimeout(() => spawnEnemy(EnemyType.SKULL, VIRT_WIDTH / 2, -VIRT_HEIGHT / 3, 0.75, 20), i * 250);
+      setTimeout(() => spawnEnemy(mkSkull(20)), i * 250);
     }
     for (let i = 0; i < 6; i++) {
-      spawnEnemy(EnemyType.ENEMY_TWO, (VIRT_WIDTH / 8) + i * (VIRT_WIDTH / 6), -VIRT_HEIGHT / 3, 1, 10);
+      spawnEnemy(mkEnemy2(10, {x: (VIRT_WIDTH / 8) + i * (VIRT_WIDTH / 6), y: -VIRT_HEIGHT / 3}));
     }
   },
   () => {
     for (let i = 0; i < 15; i++) {
-      setTimeout(() => spawnEnemy(EnemyType.SKULL_SPAWN, VIRT_WIDTH / 2,-VIRT_HEIGHT / 3, 0.75, 30), i * 500);
+      setTimeout(() => spawnEnemy(mkSkull(30, FlyBehaviour.ClockWiseFlyAround)), i * 500);
     }
-    spawnEnemy(EnemyType.SKULL_BOSS, VIRT_WIDTH / 2,-VIRT_HEIGHT / 3, 3, 300);
+    spawnEnemy(mkSkull(300, FlyBehaviour.SlowShootingClockWiseTurnAbout, 3));
   }
 ];

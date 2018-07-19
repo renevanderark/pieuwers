@@ -6,7 +6,7 @@ import { Point, isBox } from "../phyz/shapes";
 import { PieuwerToEnemyCollisions } from "../phyz/collisions";
 import { EnemyType } from "../enemies/types";
 import { makeEnemyCollisionShapes } from "../enemies/enemy-collision-shapes";
-import { makeEnemy } from "../enemies/enemy-creator";
+import { makeEnemy, EnemySpawnParams } from "../enemies/enemy-creator";
 import { Thing } from "../store/thing";
 
 
@@ -80,8 +80,8 @@ export interface CollisionAction {
 
 
 export const enemyActionCreator = (dispatch : Dispatch<EnemyAction|BulletAction>) => ({
-  spawnEnemy: (type: EnemyType, xPos : number, yPos : number, scale: number = 1, health? : number) => {
-    dispatch({type: ActionTypes.SPAWN_ENEMY, spawn: makeEnemy(type, xPos, yPos, scale, health)})
+  spawnEnemy: (params : EnemySpawnParams) => {
+    dispatch({type: ActionTypes.SPAWN_ENEMY, spawn: makeEnemy(params)})
   },
   enemiesReceiveBullet: ({bulletIdx, enemies} : {bulletIdx : number, enemies: Array<number>}) => {
     enemies.forEach(enemyIdx => {

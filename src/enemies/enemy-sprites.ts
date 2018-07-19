@@ -11,8 +11,6 @@ multiLaserPng.src = "./img/enemy3.png";
 
 export const enemySprites : {[key : string]: HTMLImageElement}= {
   [EnemyType.SKULL]: skullPng,
-  [EnemyType.SKULL_BOSS]: skullPng,
-  [EnemyType.SKULL_SPAWN]: skullPng,
   [EnemyType.ENEMY_TWO]: enemy2Png,
   [EnemyType.MULTI_LASER]: multiLaserPng
 }

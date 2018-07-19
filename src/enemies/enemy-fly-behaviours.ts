@@ -3,8 +3,16 @@ import { EnemyType } from "./types";
 import { Point } from "../phyz/shapes";
 import { VIRT_HEIGHT, VIRT_WIDTH } from "../store/constants";
 
-const flyBehaviours : {[key: string]: (enemyState : EnemyState, spawnCentral : Point) => EnemyState} = {
-  [EnemyType.SKULL]: (enemyState, spawnCentral) => ({
+export enum FlyBehaviour {
+  DoNothing = "DoNothing",
+  DefensiveSlides = "DefensiveSlides",
+  ClockWiseFlyAround = "ClockWiseFlyAround",
+  SlowShootingClockWiseTurnAbout = "SlowShootingClockWiseTurnAbout",
+  HorizontalQuarterHover = "HorizontalQuarterHover"
+};
+
+const flyBehaviours : {[key in FlyBehaviour]: (enemyState : EnemyState, spawnCentral : Point) => EnemyState} = {
+  [FlyBehaviour.DefensiveSlides]: (enemyState, spawnCentral) => ({
     ...enemyState,
     pos: {
       x: spawnCentral.x - Math.cos(enemyState.angle * Math.PI / 180) * spawnCentral.x,
@@ -12,7 +20,7 @@ const flyBehaviours : {[key: string]: (enemyState : EnemyState, spawnCentral : P
     },
     angle: enemyState.angle + 0.5 >= 360*3 ? 0 : enemyState.angle + 0.5
   }),
-  [EnemyType.SKULL_SPAWN]: (enemyState, spawnCentral) => ({
+  [FlyBehaviour.ClockWiseFlyAround]: (enemyState, spawnCentral) => ({
     ...enemyState,
     pos: {
       x: spawnCentral.x - Math.cos(enemyState.angle * Math.PI / 180) * spawnCentral.x / 1.8,
@@ -20,7 +28,7 @@ const flyBehaviours : {[key: string]: (enemyState : EnemyState, spawnCentral : P
     },
     angle: enemyState.angle + 0.5 >= 360*3 ? 0 : enemyState.angle + 0.5
   }),
-  [EnemyType.SKULL_BOSS]: (enemyState, spawnCentral) => ({
+  [FlyBehaviour.SlowShootingClockWiseTurnAbout]: (enemyState, spawnCentral) => ({
     ...enemyState,
     pos: {
       x: enemyState.startPos.x + Math.cos(enemyState.trajectory * Math.PI / 180) * (VIRT_WIDTH / 8),
@@ -31,7 +39,7 @@ const flyBehaviours : {[key: string]: (enemyState : EnemyState, spawnCentral : P
     shootTimer: enemyState.shootTimer <= 0 ? 20 : enemyState.shootTimer - 1,
     angle: enemyState.angle - 0.5 <= 0 ? 360 : enemyState.angle - 0.5
   }),
-  [EnemyType.ENEMY_TWO]: (enemyState, spawnCentral) => ({
+  [FlyBehaviour.HorizontalQuarterHover]: (enemyState, spawnCentral) => ({
     ...enemyState,
     pos: {
       x: enemyState.startPos.x + Math.cos(enemyState.trajectory * Math.PI / 180) * (VIRT_WIDTH / 4),
@@ -41,10 +49,10 @@ const flyBehaviours : {[key: string]: (enemyState : EnemyState, spawnCentral : P
     shooting: enemyState.shootTimer <= 0 ? true : false,
     shootTimer: enemyState.shootTimer <= 0 ? 50 : enemyState.shootTimer - 1
   }),
-  [EnemyType.MULTI_LASER]: (enemyState, spawnCentral) => ({
+  [FlyBehaviour.DoNothing]: (enemyState, spawnCentral) => ({
     ...enemyState
   })
 }
 
 export const fly = (enemyState : EnemyState, spawnCentral : Point) : EnemyState =>
-  flyBehaviours[enemyState.enemyType](enemyState, spawnCentral);
+  flyBehaviours[enemyState.flyBehaviour](enemyState, spawnCentral);

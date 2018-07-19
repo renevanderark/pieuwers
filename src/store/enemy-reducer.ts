@@ -5,10 +5,11 @@ import { VIRT_HEIGHT, VIRT_WIDTH } from "./constants";
 import { pointWithinBox } from "../phyz/boxes";
 import { Box, Point } from "../phyz/shapes";
 import { EnemyType } from "../enemies/types";
-import { fly } from "../enemies/enemy-fly-behaviours";
+import { fly, FlyBehaviour } from "../enemies/enemy-fly-behaviours";
 import { Thing } from "./thing";
 
 export interface EnemyState extends Thing {
+  flyBehaviour: FlyBehaviour
   enemyType: EnemyType
   startPos: Point
   trajectory: number
