@@ -16,3 +16,6 @@ export const rotateBoxAroundOrigin = (b : Box, angle : number) : [Point, Point, 
   rotateAroundOrigin({x: b.x + b.w, y: b.y + b.h}, angle),
   rotateAroundOrigin({x: b.x,       y: b.y + b.h}, angle)
 ];
+
+export const distance = (a : Point, b : Point) : number =>
+  Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));

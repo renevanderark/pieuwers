@@ -2,13 +2,13 @@ import { BulletState } from "../store/bullet-reducer";
 import { GameState } from "../store/reducers";
 import { EnemyState } from "../store/enemy-reducer";
 import { Point, Box, Circle, isBox, getBoundingBox } from "./shapes";
-import { pointWithinBox } from "./boxes";
-import { translateToOrigin, rotateAroundOrigin, rotateBoxAroundOrigin} from "./shape-ops";
+import { pointWithinBox, getTr, getBl, getBr } from "./boxes";
+import { translateToOrigin, rotateAroundOrigin, rotateBoxAroundOrigin, distance} from "./shape-ops";
 import { PieuwerKey, PieuwerState } from "../store/pieuwer-reducer";
 import { Thing } from "../store/thing";
 
 const pointWithinCircle = (pos : Point, c : Circle) : boolean =>
-  Math.sqrt(Math.pow(pos.x - c.x, 2) + Math.pow(pos.y - c.y, 2)) <= c.radius;
+  distance(pos, c) <= c.radius;
 
 const pointWithinAreaList = (p : Point, shapes : Array<Circle|Box>) : boolean =>
   shapes.map(shape => isBox(shape) ? pointWithinBox(p, <Box>shape) : pointWithinCircle(p, <Circle>shape))
@@ -79,15 +79,15 @@ const getBoundingBoxCollisionsForPieuwer = (pieuwer : PieuwerState, enemies : Ar
 
 
 const circleCollidesWithCircle = (a : Circle, b : Circle) =>
-  Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2)) <= a.radius + b.radius;
+  distance(a, b) <= a.radius + b.radius;
 
 
 
 const circleCollidesWithBox = (c : Circle, b : Box) =>
-  Math.sqrt(Math.pow(c.x - b.x, 2) + Math.pow(c.y - b.y, 2)) <= c.radius ||
-  Math.sqrt(Math.pow(c.x - (b.x + b.w), 2) + Math.pow(c.y - b.y, 2)) <= c.radius ||
-  Math.sqrt(Math.pow(c.x - (b.x + b.w), 2) + Math.pow(c.y - (b.y + b.h), 2)) <= c.radius ||
-  Math.sqrt(Math.pow(c.x - b.x, 2) + Math.pow(c.y - (b.y + b.h), 2)) <= c.radius ||
+  distance(c, b) <= c.radius ||
+  distance(c, getTr(b)) <= c.radius ||
+  distance(c, getBl(b)) <= c.radius ||
+  distance(c, getBr(b)) <= c.radius ||
   pointWithinBox({x: c.x + Math.cos(Math.PI / 180) * c.radius, y: c.y + Math.sin(Math.PI / 180) * c.radius}, b) ||
   pointWithinBox({x: c.x + Math.cos(90 * (Math.PI / 180)) * c.radius, y: c.y + Math.sin(90 * (Math.PI / 180)) * c.radius}, b) ||
   pointWithinBox({x: c.x + Math.cos(180 * (Math.PI / 180)) * c.radius, y: c.y + Math.sin(180 * (Math.PI / 180)) * c.radius}, b) ||
