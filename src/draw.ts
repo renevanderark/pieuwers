@@ -4,13 +4,13 @@ import { PieuwerState, PieuwerKey } from "./store/pieuwer-reducer";
 import { EnemyState } from "./store/enemy-reducer";
 import { ExplosionState } from "./store/explosion-reducer";
 import { isBox, Box, Circle, Point, getBoundingBox } from "./phyz/shapes";
-import { PIEUWER_WIDTH, PIEUWER_HEIGHT } from "./store/constants";
+import { PIEUWER_WIDTH, PIEUWER_HEIGHT, VIRT_HEIGHT } from "./store/constants";
 import { rotateBoxAroundOrigin, translateToOrigin, rotateAroundOrigin } from "./phyz/shape-ops";
 import { CollisionList } from "./phyz/collisions";
 import { EnemyType } from "./enemies/types";
 import { ENEMY_BOUNDS } from "./enemies/enemy-bounding-boxes";
 import { enemySprites } from "./enemies/enemy-sprites";
-import { Thing } from "./store/thing";
+import { Thing, FireType } from "./store/thing";
 
 
 const pieuwerOnePng = new Image();
@@ -64,10 +64,11 @@ const getImage = (img : HTMLImageElement, imgDims: Point, targetRect: Point) : H
 
 const drawThing = <T extends Thing>(thing : T, img : HTMLImageElement, imgDims : Point) : Drawable =>
   (ctx: CanvasRenderingContext2D, scale: number) => {
+    const isEnemy = "enemyType" in thing;
     ctx.save();
     ctx.translate(Math.floor(thing.pos.x * scale), Math.floor(thing.pos.y * scale));
     const health = thing.health / thing.maxHealth;
-    const healthBarWidth = "enemyType" in thing ? thing.size.x * scale : thing.size.x * scale * 0.25;
+    const healthBarWidth = isEnemy ? thing.size.x * scale : thing.size.x * scale * 0.25;
 
     ctx.fillStyle = "rgba(255,0,0,0.8)";
     ctx.fillRect(-(thing.size.x / 2)*scale, -((thing.size.y / 2) + 15) * scale, healthBarWidth, 5 * scale);
@@ -81,6 +82,25 @@ const drawThing = <T extends Thing>(thing : T, img : HTMLImageElement, imgDims :
       Math.floor(-(thing.size.y / 2)*scale));
     // drawCollisionShapes(ctx, scale, thing.collisionShapes);
     ctx.restore();
+    if (isEnemy && thing.fireType === FireType.LASER) {
+
+      ctx.fillStyle = "rgba(255,255,0,0.8)";
+      if (thing.shooting) {
+        ctx.fillRect(
+          Math.floor((thing.pos.x - Math.random() * 4) * scale),
+          Math.floor((thing.pos.y + thing.size.y / 2) * scale),
+          Math.ceil(Math.random() * 4 * scale),
+          Math.ceil((VIRT_HEIGHT - (thing.pos.y + thing.size.y / 2))  * scale)
+        );
+      } else {
+        ctx.beginPath();
+        ctx.arc(
+          Math.floor((thing.pos.x - Math.random() * 4) * scale),
+          Math.floor((thing.pos.y + thing.size.y / 2) * scale),
+          Math.random() * (200-thing.shootTimer) * 0.5 * scale, 0, Math.PI*2);
+        ctx.fill();
+      }
+    }
   };
 
 export const drawPieuwer = (pieuwerKey : PieuwerKey, ps : PieuwerState) : Drawable =>

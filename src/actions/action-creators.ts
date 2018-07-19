@@ -7,7 +7,7 @@ import { PieuwerToEnemyCollisions } from "../phyz/collisions";
 import { EnemyType } from "../enemies/types";
 import { makeEnemyCollisionShapes } from "../enemies/enemy-collision-shapes";
 import { makeEnemy, EnemySpawnParams } from "../enemies/enemy-creator";
-import { Thing } from "../store/thing";
+import { Thing, FireType } from "../store/thing";
 
 
 
@@ -65,6 +65,7 @@ export interface EnemyAction {
   type: ActionTypes
   spawn?: EnemyState
   enemyIdx?: number
+  pieuwerPositions?: Array<Point>
 }
 
 export interface ExplosionAction {
@@ -99,12 +100,12 @@ export const explosionActionCreator = (dispatch : Dispatch<ExplosionAction>) => 
 
 export const bulletActionCreator = (dispatch : Dispatch<BulletAction>) => ({
   spawnBullet: <T extends Thing>(thing : T) =>  {
-    if (thing.shooting) {
+    if (thing.shooting && thing.fireType === FireType.BULLET) {
       const trajectory = ("enemyType" in thing ?  (thing.angle + 90) : (thing.angle - 90)) * (Math.PI / 180);
       dispatch({
         type: ActionTypes.SPAWN_BULLET,
-        xPos: thing.pos.x + Math.cos(trajectory) * 120,
-        yPos: thing.pos.y + Math.sin(trajectory) * 120,
+        xPos: thing.pos.x + (Math.cos(trajectory) * thing.size.x / 2),
+        yPos: thing.pos.y + (Math.sin(trajectory) * thing.size.y / 2),
         trajectory: trajectory,
         bulletType: "enemyType" in thing ? "enemyBullets" : "bullets"
       });

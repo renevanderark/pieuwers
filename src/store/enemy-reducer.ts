@@ -67,7 +67,7 @@ export default function(state : MultiEnemyState, action : EnemyAction) : MultiEn
           x: state.spawnCentral.x,
           y: state.spawnCentral.y < VIRT_HEIGHT / 2 ? state.spawnCentral.y + 1 : VIRT_HEIGHT / 2
         },
-        enemies: state.enemies.map(enemy => fly(enemy, state.spawnCentral))
+        enemies: state.enemies.map(enemy => fly(enemy, state.spawnCentral, action.pieuwerPositions))
           .filter((enemy) => enemy.health > 0)
       };
       break;

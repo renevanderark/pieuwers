@@ -4,10 +4,12 @@ import { EnemyState } from "../store/enemy-reducer";
 import { makeEnemyCollisionShapes } from "./enemy-collision-shapes";
 import { ENEMY_BOUNDS } from "./enemy-bounding-boxes";
 import { FlyBehaviour } from "./enemy-fly-behaviours";
+import { FireType } from "../store/thing";
 
 export interface EnemySpawnParams {
   type: EnemyType
   flyBehaviour: FlyBehaviour
+  fireType: FireType
   health: number
   scale: number
   pos: Point
@@ -15,6 +17,7 @@ export interface EnemySpawnParams {
 
 export const makeEnemy = (p : EnemySpawnParams) : EnemyState => ({
   enemyType: p.type,
+  fireType: p.fireType,
   flyBehaviour: p.flyBehaviour,
   angle: 0,
   shooting: false,

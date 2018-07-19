@@ -4,7 +4,7 @@ import { VIRT_WIDTH, VIRT_HEIGHT, PIEUWER_WIDTH, PIEUWER_HEIGHT } from "./consta
 import { KeyAction } from "../actions/action-creators";
 import { Point, Box, Circle } from "../phyz/shapes";
 import { guardNumber } from "../phyz/guard-number";
-import { Thing } from "./thing";
+import { Thing, FireType } from "./thing";
 
 const yAcceleration = 0.25;
 const maxYSpeed = 5;
@@ -58,8 +58,10 @@ const initializePieuwerState = (xPos : number, collisionShapes : Array<Box|Circl
   angle: 0, ySpeed: 0, shooting: false,
   health: 250,
   maxHealth: 250,
+  fireType: FireType.BULLET,
   collisionShapes: collisionShapes,
   pos: {x: xPos, y: VIRT_HEIGHT - 150},
+  shootTimer: 0,
   size: {x: PIEUWER_WIDTH, y: PIEUWER_HEIGHT},
 });
 

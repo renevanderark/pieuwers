@@ -14,7 +14,7 @@ import { keyActionCreator, bulletActionCreator, enemyActionCreator, explosionAct
 import { ActionTypes } from './actions/action-types';
 
 import { Point } from './phyz/shapes';
-import { detectBulletToEnemyCollisions, detectPieuwerToEnemyCollisions, PieuwerToEnemyCollisions, detectEnemyBulletToPieuwerCollisions } from './phyz/collisions';
+import { detectBulletToEnemyCollisions, detectPieuwerToEnemyCollisions, PieuwerToEnemyCollisions, detectEnemyBulletToPieuwerCollisions, detectEnemyLaserToPieuwerCollisions } from './phyz/collisions';
 import { PieuwerKey } from './store/pieuwer-reducer';
 import { EnemyType } from './enemies/types';
 import { level1 } from './levels';
@@ -100,6 +100,17 @@ const handlePieuwerToEnemyCollisions = (collisions : PieuwerToEnemyCollisions) =
   }
 };
 
+const handleLaserToPieuwerCollision = (collisions : {pieuwerKeys: Array<string>}) => {
+  const pieuwerStates = store.getState().pieuwerStates;
+  collisions.pieuwerKeys.forEach(pieuwerKey => {
+    store.dispatch({type: ActionTypes.PIEUWER_COLLIDES, player: pieuwerKey})
+    spawnExplosion(
+      { x: pieuwerStates[pieuwerKey].pos.x - 60 + Math.random() * 120,
+        y: pieuwerStates[pieuwerKey].pos.y + Math.random() * 120}, Math.random() * 6
+    );
+  });
+}
+
 let gameOver = false;
 const game = () => {
   const renderLoop = () => {
@@ -127,12 +138,12 @@ const game = () => {
   };
 
   let spawns = level1(spawnEnemy);
-  //setTimeout(() => spawnEnemy(EnemyType.SKULL_BOSS, VIRT_WIDTH / 2, VIRT_HEIGHT / 3, 4, 150), 12000);
 
   let uploopinterval : number, bulletInterval : number;
   const updateLoop = () => {
+    const {pieuwerStates: {pieuwerOne, pieuwerTwo}} = store.getState();
 
-    store.dispatch({type: ActionTypes.UPDATE});
+    store.dispatch({type: ActionTypes.UPDATE, pieuwerPositions: [pieuwerOne.pos, pieuwerTwo.pos]});
 
     const gameState = store.getState();
 
@@ -141,6 +152,10 @@ const game = () => {
 
     detectEnemyBulletToPieuwerCollisions(gameState)
       .forEach(handleBulletPieuwerCollision);
+
+      detectEnemyLaserToPieuwerCollisions(gameState)
+        .forEach(handleLaserToPieuwerCollision);
+
 
     handlePieuwerToEnemyCollisions(detectPieuwerToEnemyCollisions(gameState));
 

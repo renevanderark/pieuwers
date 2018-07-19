@@ -19,3 +19,6 @@ export const rotateBoxAroundOrigin = (b : Box, angle : number) : [Point, Point, 
 
 export const distance = (a : Point, b : Point) : number =>
   Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
+
+export const getClosestPoint = (a : Point, b : Point, c : Point) : Point =>
+  distance(a, b) < distance(a, c) ? b : c;

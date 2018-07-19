@@ -3,13 +3,15 @@ import { VIRT_WIDTH, VIRT_HEIGHT } from "./store/constants";
 import { EnemySpawnParams } from "./enemies/enemy-creator";
 import { FlyBehaviour } from "./enemies/enemy-fly-behaviours";
 import { Point } from "./phyz/shapes";
+import { FireType } from "./store/thing";
 
 const mkSkull = (health : number, flyBehaviour? : FlyBehaviour, scale? : number) : EnemySpawnParams => ({
   type: EnemyType.SKULL,
   flyBehaviour: flyBehaviour || FlyBehaviour.DefensiveSlides,
   pos: {x: VIRT_WIDTH / 2, y: -VIRT_HEIGHT / 3},
   scale: scale || 0.75,
-  health:  health
+  health:  health,
+  fireType: FireType.BULLET
 });
 
 const mkEnemy2 = (health : number, pos: Point) : EnemySpawnParams => ({
@@ -17,7 +19,17 @@ const mkEnemy2 = (health : number, pos: Point) : EnemySpawnParams => ({
   flyBehaviour: FlyBehaviour.HorizontalQuarterHover,
   pos: pos,
   scale: 1,
-  health:  health
+  health:  health,
+  fireType: FireType.BULLET
+});
+
+const mkMultiLaser = (health : number, pos: Point) : EnemySpawnParams => ({
+  type: EnemyType.ENEMY_TWO,
+  flyBehaviour: FlyBehaviour.PointAtClosestPieuwer,
+  pos: pos,
+  scale: 1,
+  health:  health,
+  fireType: FireType.LASER
 });
 
 export const level1 = (spawnEnemy : (p : EnemySpawnParams) => void) => [
@@ -36,11 +48,9 @@ export const level1 = (spawnEnemy : (p : EnemySpawnParams) => void) => [
   },
   () => {
     for (let i = 0; i < 12; i++) {
-      setTimeout(() => spawnEnemy(mkSkull(20)), i * 250);
+      setTimeout(() => spawnEnemy(mkSkull(10)), i * 250);
     }
-    for (let i = 0; i < 6; i++) {
-      spawnEnemy(mkEnemy2(10, {x: (VIRT_WIDTH / 8) + i * (VIRT_WIDTH / 6), y: -VIRT_HEIGHT / 3}));
-    }
+    spawnEnemy(mkMultiLaser(20, {x: VIRT_WIDTH / 2, y: -VIRT_HEIGHT / 3}));
   },
   () => {
     for (let i = 0; i < 15; i++) {

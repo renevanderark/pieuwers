@@ -5,7 +5,7 @@ import { Point, Box, Circle, isBox, getBoundingBox } from "./shapes";
 import { pointWithinBox, getTr, getBl, getBr } from "./boxes";
 import { translateToOrigin, rotateAroundOrigin, rotateBoxAroundOrigin, distance} from "./shape-ops";
 import { PieuwerKey, PieuwerState } from "../store/pieuwer-reducer";
-import { Thing } from "../store/thing";
+import { Thing, FireType } from "../store/thing";
 
 const pointWithinCircle = (pos : Point, c : Circle) : boolean =>
   distance(pos, c) <= c.radius;
@@ -59,6 +59,17 @@ export const detectEnemyBulletToPieuwerCollisions : (s : GameState) => Array<{pi
   }))
   .filter(({pieuwerKeys, bulletIdx}) => pieuwerKeys.length > 0);
 
+const thingCollidesWithLaser = (laserPoint : Point, thing: Thing) : boolean =>
+  laserPoint.x >= thing.pos.x - thing.size.x / 2 && laserPoint.x <= thing.pos.x + thing.size.x / 2;
+
+export const detectEnemyLaserToPieuwerCollisions : (s : GameState) => Array<{pieuwerKeys: Array<string>}> =
+    ({ enemyStates : { enemies }, pieuwerStates }) =>
+    enemies
+      .filter(enemy => enemy.fireType === FireType.LASER && enemy.shooting)
+      .map((enemy) => ({ pieuwerKeys: ["pieuwerOne", "pieuwerTwo"]
+        .filter(pieuwerKey => thingCollidesWithLaser(enemy.pos, pieuwerStates[pieuwerKey])),
+      }))
+    .filter(({pieuwerKeys}) => pieuwerKeys.length > 0);
 
 const getBoundingBoxCollisionsForPieuwer = (pieuwer : PieuwerState, enemies : Array<EnemyState>) : Array<number> =>
   rotateBoxAroundOrigin(getBoundingBox(pieuwer), pieuwer.angle * Math.PI / 180)
