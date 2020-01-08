@@ -32,6 +32,17 @@ const mkMultiLaser = (health : number, pos: Point) : EnemySpawnParams => ({
   fireType: FireType.LASER
 });
 
+const mkNaaldlaser = (health : number, pos: Point) : EnemySpawnParams => ({
+  type: EnemyType.NAALDLASER,
+  flyBehaviour:  FlyBehaviour.HorizontalQuarterHoverWithLaser,
+  pos: pos,
+  scale: 2,
+  health:  health,
+  fireType: FireType.LASER
+});
+
+
+
 export const level1 = (spawnEnemy : (p : EnemySpawnParams) => void) => [
   () => {
     for (let i = 0; i < 16; i++) {
@@ -45,6 +56,12 @@ export const level1 = (spawnEnemy : (p : EnemySpawnParams) => void) => [
     for (let i = 0; i < 4; i++) {
       spawnEnemy(mkEnemy2(5, {x: (VIRT_WIDTH / 8) + i * (VIRT_WIDTH / 4), y: -VIRT_HEIGHT / 3}));
     }
+  },
+  () => {
+
+    spawnEnemy(mkNaaldlaser(20, {x: VIRT_WIDTH - VIRT_WIDTH / 2, y: -VIRT_HEIGHT / 3}));
+    setTimeout(() => spawnEnemy(mkNaaldlaser(20, {x: VIRT_WIDTH - VIRT_WIDTH / 2, y: -VIRT_HEIGHT / 3})), 1000);
+
   },
   () => {
     for (let i = 0; i < 12; i++) {

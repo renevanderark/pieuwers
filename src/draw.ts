@@ -80,7 +80,7 @@ const drawThing = <T extends Thing>(thing : T, img : HTMLImageElement, imgDims :
     ctx.drawImage(getImage(img, imgDims, {x:Math.ceil(thing.size.x * scale) ,y: Math.ceil(thing.size.y * scale)}),
       Math.floor(-(thing.size.x / 2)*scale),
       Math.floor(-(thing.size.y / 2)*scale));
-    // drawCollisionShapes(ctx, scale, thing.collisionShapes);
+      // drawCollisionShapes(ctx, scale, thing.collisionShapes);
     ctx.restore();
     if (isEnemy && thing.fireType === FireType.LASER) {
 
@@ -97,7 +97,7 @@ const drawThing = <T extends Thing>(thing : T, img : HTMLImageElement, imgDims :
         ctx.arc(
           Math.floor((thing.pos.x - Math.random() * 4) * scale),
           Math.floor((thing.pos.y + thing.size.y / 2) * scale),
-          Math.random() * (100-thing.shootTimer) * scale, 0, Math.PI*2);
+          Math.random() * (400-thing.shootTimer) / 4 * scale, 0, Math.PI*2);
         ctx.fill();
       }
     }

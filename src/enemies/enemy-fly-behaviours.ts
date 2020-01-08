@@ -10,6 +10,7 @@ export enum FlyBehaviour {
   ClockWiseFlyAround = "ClockWiseFlyAround",
   SlowShootingClockWiseTurnAbout = "SlowShootingClockWiseTurnAbout",
   HorizontalQuarterHover = "HorizontalQuarterHover",
+  HorizontalQuarterHoverWithLaser = "HorizontalQuarterHoverWithLaser",
   PointAtClosestPieuwer = "PointAtClosestPieuwer"
 };
 
@@ -50,6 +51,16 @@ const flyBehaviours : {[key in FlyBehaviour]: (enemyState : EnemyState, spawnCen
     trajectory: enemyState.trajectory + 0.5 >= 360 ? 0 : enemyState.trajectory + 0.5,
     shooting: enemyState.shootTimer <= 0 ? true : false,
     shootTimer: enemyState.shootTimer <= 0 ? 50 : enemyState.shootTimer - 1
+  }),
+  [FlyBehaviour.HorizontalQuarterHoverWithLaser]: (enemyState, spawnCentral, pieuwerPositions) => ({
+    ...enemyState,
+    pos: {
+      x: enemyState.startPos.x + Math.cos(enemyState.trajectory * Math.PI / 180) * (VIRT_WIDTH / 4),
+      y: spawnCentral.y - VIRT_HEIGHT / 3
+    },
+    trajectory: enemyState.trajectory + 0.5 >= 360 ? 0 : enemyState.trajectory + 0.5,
+    shooting: enemyState.shootTimer < 100,
+    shootTimer: enemyState.shootTimer <= 0 ? 400 : enemyState.shootTimer - 1
   }),
   [FlyBehaviour.DoNothing]: (enemyState, spawnCentral, pieuwerPositions) => ({
     ...enemyState

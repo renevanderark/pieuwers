@@ -100,5 +100,6 @@ export const makeEnemyCollisionShapes : {[key : string]: (scale : number) => Arr
     {x: -16 * scale, y: 16 * scale, radius: 14 * scale},
     {x: 16 * scale,  y: 14 * scale, radius: 12 * scale},
     {x: -33 * scale, y: -5 * scale, radius: 13 * scale},
-  ]
+  ],
+  [EnemyType.NAALDLASER]: (scale) => [{x: -5 * scale, y: 40 * scale, w: 10 * scale, h: 30 * scale}]
 }
