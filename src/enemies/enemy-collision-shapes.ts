@@ -1,5 +1,5 @@
 import { EnemyType } from "./types";
-import { Circle, Box, isBox, Point } from "../phyz/shapes";
+import { Circle, Box, isBox } from "../phyz/shapes";
 import { ENEMY_BOUNDS } from "./enemy-bounding-boxes";
 
 const makeSkullShapes = (scale : number) : Array<Box|Circle> => [

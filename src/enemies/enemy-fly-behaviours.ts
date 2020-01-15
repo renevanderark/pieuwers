@@ -1,5 +1,4 @@
 import { EnemyState } from "../store/enemy-reducer";
-import { EnemyType } from "./types";
 import { Point } from "../phyz/shapes";
 import { VIRT_HEIGHT, VIRT_WIDTH } from "../store/constants";
 import { getClosestPoint } from "../phyz/shape-ops";

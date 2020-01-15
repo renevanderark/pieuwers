@@ -1,8 +1,5 @@
 import { ActionTypes  } from "../actions/action-types";
-import { AnyAction } from "redux";
-import { VIRT_WIDTH, VIRT_HEIGHT } from "./constants";
-import { KeyAction, BulletAction, ExplosionAction, CollisionAction } from "../actions/action-creators";
-import { Point } from "../phyz/shapes";
+import { CollisionAction } from "../actions/action-creators";
 import { PieuwerToEnemyCollisions } from "../phyz/collisions";
 
 

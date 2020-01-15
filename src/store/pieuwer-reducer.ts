@@ -1,8 +1,7 @@
 import { ActionTypes  } from "../actions/action-types";
-import { AnyAction } from "redux";
 import { VIRT_WIDTH, VIRT_HEIGHT, PIEUWER_WIDTH, PIEUWER_HEIGHT } from "./constants";
 import { KeyAction } from "../actions/action-creators";
-import { Point, Box, Circle } from "../phyz/shapes";
+import { Box, Circle } from "../phyz/shapes";
 import { guardNumber } from "../phyz/guard-number";
 import { Thing, FireType } from "./thing";
 

@@ -1,11 +1,9 @@
-import { Dispatch, AnyAction } from "redux";
+import { Dispatch } from "redux";
 import { ActionTypes } from "./action-types";
 import { PieuwerControl, PieuwerKey, PieuwerState } from "../store/pieuwer-reducer";
 import { EnemyState } from "../store/enemy-reducer";
-import { Point, isBox } from "../phyz/shapes";
+import { Point } from "../phyz/shapes";
 import { PieuwerToEnemyCollisions } from "../phyz/collisions";
-import { EnemyType } from "../enemies/types";
-import { makeEnemyCollisionShapes } from "../enemies/enemy-collision-shapes";
 import { makeEnemy, EnemySpawnParams } from "../enemies/enemy-creator";
 import { Thing, FireType } from "../store/thing";
 
@@ -101,7 +99,7 @@ export const explosionActionCreator = (dispatch : Dispatch<ExplosionAction>) => 
 export const bulletActionCreator = (dispatch : Dispatch<BulletAction>) => ({
   spawnBullet: <T extends Thing>(thing : T) =>  {
     if (thing.shooting && thing.fireType === FireType.BULLET) {
-      const trajectory = ("enemyType" in thing ?  (thing.angle + 90) : (thing.angle - 90)) * (Math.PI / 180);
+      const trajectory = ("enemyType" in thing ?  (thing.angle + 90) : ((thing.angle * 1.5) - 90)) * (Math.PI / 180);
       dispatch({
         type: ActionTypes.SPAWN_BULLET,
         xPos: thing.pos.x + (Math.cos(trajectory) * thing.size.x / 2),

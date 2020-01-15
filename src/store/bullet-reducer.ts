@@ -1,7 +1,6 @@
 import { ActionTypes  } from "../actions/action-types";
-import { AnyAction } from "redux";
 import { VIRT_WIDTH, VIRT_HEIGHT } from "./constants";
-import { KeyAction, BulletAction } from "../actions/action-creators";
+import { BulletAction } from "../actions/action-creators";
 import { Point } from "../phyz/shapes";
 
 

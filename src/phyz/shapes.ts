@@ -1,4 +1,3 @@
-import { PieuwerState } from "../store/pieuwer-reducer";
 import { Thing } from "../store/thing";
 
 export interface Point {

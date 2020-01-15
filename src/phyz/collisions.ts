@@ -4,7 +4,7 @@ import { EnemyState } from "../store/enemy-reducer";
 import { Point, Box, Circle, isBox, getBoundingBox } from "./shapes";
 import { pointWithinBox, getTr, getBl, getBr } from "./boxes";
 import { translateToOrigin, rotateAroundOrigin, rotateBoxAroundOrigin, distance} from "./shape-ops";
-import { PieuwerKey, PieuwerState } from "../store/pieuwer-reducer";
+import { PieuwerState } from "../store/pieuwer-reducer";
 import { Thing, FireType } from "../store/thing";
 
 const pointWithinCircle = (pos : Point, c : Circle) : boolean =>

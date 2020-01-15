@@ -15,8 +15,6 @@ import { ActionTypes } from './actions/action-types';
 
 import { Point } from './phyz/shapes';
 import { detectBulletToEnemyCollisions, detectPieuwerToEnemyCollisions, PieuwerToEnemyCollisions, detectEnemyBulletToPieuwerCollisions, detectEnemyLaserToPieuwerCollisions } from './phyz/collisions';
-import { PieuwerKey } from './store/pieuwer-reducer';
-import { EnemyType } from './enemies/types';
 import { level1 } from './levels';
 
 const store = createStore(combineReducers(reducers));
@@ -31,7 +29,6 @@ if (!(mainLayer instanceof HTMLCanvasElement)) { throw new TypeError("wrong elem
 const mainLayerCtx = mainLayer.getContext("2d");
 const mainFrameRenderer = getFrameRenderer(mainLayerCtx, mainLayer);
 
-const debug = document.getElementById("debug");
 
 let gamePadToPlayerMap : {[key : string] : "pieuwerOne"|"pieuwerTwo"} = {
   "0": "pieuwerOne", "1": "pieuwerTwo"
@@ -153,8 +150,8 @@ const game = () => {
     detectEnemyBulletToPieuwerCollisions(gameState)
       .forEach(handleBulletPieuwerCollision);
 
-      detectEnemyLaserToPieuwerCollisions(gameState)
-        .forEach(handleLaserToPieuwerCollision);
+    detectEnemyLaserToPieuwerCollisions(gameState)
+      .forEach(handleLaserToPieuwerCollision);
 
 
     handlePieuwerToEnemyCollisions(detectPieuwerToEnemyCollisions(gameState));

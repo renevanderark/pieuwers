@@ -1,4 +1,3 @@
-import { Point } from "../phyz/shapes";
 
 export enum EnemyType {
   SKULL = "SKULL",

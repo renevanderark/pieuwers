@@ -1,9 +1,7 @@
 import { ActionTypes } from "../actions/action-types";
-import { PieuwerState } from "./pieuwer-reducer";
 import { EnemyAction } from "../actions/action-creators";
 import { VIRT_HEIGHT, VIRT_WIDTH } from "./constants";
-import { pointWithinBox } from "../phyz/boxes";
-import { Box, Point } from "../phyz/shapes";
+import { Point } from "../phyz/shapes";
 import { EnemyType } from "../enemies/types";
 import { fly, FlyBehaviour } from "../enemies/enemy-fly-behaviours";
 import { Thing } from "./thing";
@@ -31,7 +29,6 @@ export default function(state : MultiEnemyState, action : EnemyAction) : MultiEn
   if (typeof state === 'undefined') {
     return initialState;
   }
-  let newState = state;
   switch (action.type) {
     case ActionTypes.RESET_ENEMY_CENTRAL:
       return {
