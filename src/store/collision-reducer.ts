@@ -19,6 +19,8 @@ export default function(state : MultiCollisionState, action : CollisionAction) :
     return initialState;
   }
   switch (action.type) {
+    case ActionTypes.RESET_INITIAL_STATE:
+      return initialState;
     case ActionTypes.SET_COLLISIONS:
       return {
         collisions: action.collisions

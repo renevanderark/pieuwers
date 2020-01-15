@@ -25,7 +25,8 @@ const pieuwerPngs : {[key : string] : HTMLImageElement} = {
 };
 
 export function preload(callback : () => void) {
-  if (pieuwerOnePng.complete && enemySprites[EnemyType.SKULL].complete && enemySprites[EnemyType.ENEMY_TWO].complete) {
+  if (pieuwerOnePng.complete && 
+    Object.keys(enemySprites).map(key => enemySprites[key].complete).indexOf(false) < 0) {
     callback();
   } else {
     setTimeout(() => preload(callback), 1);

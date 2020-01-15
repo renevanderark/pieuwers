@@ -29,6 +29,8 @@ export default function(state : MultiExplosionState, action : ExplosionAction) :
     return initialState;
   }
   switch (action.type) {
+    case ActionTypes.RESET_INITIAL_STATE:
+      return initialState;
     case ActionTypes.SPAWN_EXPLOSION:
       return {
         explosions: state.explosions.concat({

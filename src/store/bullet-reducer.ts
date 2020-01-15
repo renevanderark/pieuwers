@@ -37,6 +37,8 @@ export default function(state : MultiBulletState, action : BulletAction) : Multi
     return initialState;
   }
   switch (action.type) {
+    case ActionTypes.RESET_INITIAL_STATE:
+      return initialState;
     case ActionTypes.REMOVE_BULLET:
       return {
         ...state,

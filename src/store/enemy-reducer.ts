@@ -30,6 +30,8 @@ export default function(state : MultiEnemyState, action : EnemyAction) : MultiEn
     return initialState;
   }
   switch (action.type) {
+    case ActionTypes.RESET_INITIAL_STATE:
+      return initialState;
     case ActionTypes.RESET_ENEMY_CENTRAL:
       return {
         ...state,

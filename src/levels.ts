@@ -41,9 +41,9 @@ const mkNaaldlaser = (health : number, pos: Point) : EnemySpawnParams => ({
   fireType: FireType.LASER
 });
 
+export type Level = (spawnEnemy : (p : EnemySpawnParams) => void) => Array<() => void>;
 
-
-export const level1 = (spawnEnemy : (p : EnemySpawnParams) => void) => [
+export const level1 : Level = (spawnEnemy) => [
   () => {
     for (let i = 0; i < 16; i++) {
       setTimeout(() => spawnEnemy(mkSkull(5)), i * 250);

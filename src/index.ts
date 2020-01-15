@@ -15,7 +15,7 @@ import { ActionTypes } from './actions/action-types';
 
 import { Point } from './phyz/shapes';
 import { detectBulletToEnemyCollisions, detectPieuwerToEnemyCollisions, PieuwerToEnemyCollisions, detectEnemyBulletToPieuwerCollisions, detectEnemyLaserToPieuwerCollisions } from './phyz/collisions';
-import { level1 } from './levels';
+import { level1, Level } from './levels';
 
 const store = createStore(combineReducers(reducers));
 
@@ -29,6 +29,7 @@ if (!(mainLayer instanceof HTMLCanvasElement)) { throw new TypeError("wrong elem
 const mainLayerCtx = mainLayer.getContext("2d");
 const mainFrameRenderer = getFrameRenderer(mainLayerCtx, mainLayer);
 
+const levelplaat = document.getElementById("levelplaat");
 
 let gamePadToPlayerMap : {[key : string] : "pieuwerOne"|"pieuwerTwo"} = {
   "0": "pieuwerOne", "1": "pieuwerTwo"
@@ -36,40 +37,15 @@ let gamePadToPlayerMap : {[key : string] : "pieuwerOne"|"pieuwerTwo"} = {
 initPadEvents();
 
 const eventListeners = getEventListeners();
-eventListeners.add("keydown", (ev : KeyboardEvent) => { onKeyDown(ev.key); });
-eventListeners.add("keyup", (ev : KeyboardEvent) => { onKeyUp(ev.key); });
-['a', 'b', 'x', 'y'].forEach(k => {
-  eventListeners.add(`gamepad-${k}-pressed`, (ev : CustomEvent) => onGamePadButtonDown("a", gamePadToPlayerMap[ev.detail.controllerIndex]));
-  eventListeners.add(`gamepad-${k}-released`, (ev : CustomEvent) => onGamePadButtonUp("a", gamePadToPlayerMap[ev.detail.controllerIndex]));
-});
-['up', 'left', 'right', 'down'].forEach(k => {
-  eventListeners.add(`gamepad-${k}-pressed`, (ev : CustomEvent) => onGamePadButtonDown(k, gamePadToPlayerMap[ev.detail.controllerIndex]));
-  eventListeners.add(`gamepad-${k}-released`, (ev : CustomEvent) => onGamePadButtonUp(k, gamePadToPlayerMap[ev.detail.controllerIndex]));
-});
-
-['r', 'l'].forEach(k => {
-  eventListeners.add(`gamepad-${k}-axis-x-change`, (ev : CustomEvent) =>  {
-    store.dispatch({type: ActionTypes.AXIS_X_CHANGE,
-      player: gamePadToPlayerMap[ev.detail.controllerIndex],
-      axisForce: Math.round(ev.detail.rounded * 0.01)
-    });
-  });
-});
-
-['r', 'l'].forEach(k => {
-  eventListeners.add(`gamepad-${k}-axis-y-change`, (ev : CustomEvent) =>  {
-    store.dispatch({type: ActionTypes.AXIS_Y_CHANGE,
-      player: gamePadToPlayerMap[ev.detail.controllerIndex],
-      axisForce: -Math.round(ev.detail.rounded * 0.01)
-    });
-  });
-});
 
 initViewPort(VIRT_WIDTH, VIRT_HEIGHT, getResizeListeners([mainLayer],
   eventListeners.onResize,
-  mainFrameRenderer.onResize
+  mainFrameRenderer.onResize,
+  () => {
+    levelplaat.style.width = window.innerWidth + "px";
+    levelplaat.style.top = -(levelplaat.clientHeight - window.innerHeight) + "px";
+  }
 ));
-
 
 const handleBulletEnemyCollision = (params : {bulletIdx : number, enemies: Array<number>, collsionPos : Point}) => {
   enemiesReceiveBullet(params);
@@ -108,8 +84,40 @@ const handleLaserToPieuwerCollision = (collisions : {pieuwerKeys: Array<string>}
   });
 }
 
-let gameOver = false;
-const game = () => {
+
+const game = (level : Level) => {
+  let gameOver = false;
+  store.dispatch({type: ActionTypes.RESET_INITIAL_STATE});
+
+  eventListeners.add("keydown", (ev : KeyboardEvent) => { onKeyDown(ev.key); });
+  eventListeners.add("keyup", (ev : KeyboardEvent) => { onKeyUp(ev.key); });
+  ['a', 'b', 'x', 'y'].forEach(k => {
+    eventListeners.add(`gamepad-${k}-pressed`, (ev : CustomEvent) => onGamePadButtonDown("a", gamePadToPlayerMap[ev.detail.controllerIndex]));
+    eventListeners.add(`gamepad-${k}-released`, (ev : CustomEvent) => onGamePadButtonUp("a", gamePadToPlayerMap[ev.detail.controllerIndex]));
+  });
+  ['up', 'left', 'right', 'down'].forEach(k => {
+    eventListeners.add(`gamepad-${k}-pressed`, (ev : CustomEvent) => onGamePadButtonDown(k, gamePadToPlayerMap[ev.detail.controllerIndex]));
+    eventListeners.add(`gamepad-${k}-released`, (ev : CustomEvent) => onGamePadButtonUp(k, gamePadToPlayerMap[ev.detail.controllerIndex]));
+  });
+
+  ['r', 'l'].forEach(k => {
+    eventListeners.add(`gamepad-${k}-axis-x-change`, (ev : CustomEvent) =>  {
+      store.dispatch({type: ActionTypes.AXIS_X_CHANGE,
+        player: gamePadToPlayerMap[ev.detail.controllerIndex],
+        axisForce: Math.round(ev.detail.rounded * 0.01)
+      });
+    });
+  });
+
+  ['r', 'l'].forEach(k => {
+    eventListeners.add(`gamepad-${k}-axis-y-change`, (ev : CustomEvent) =>  {
+      store.dispatch({type: ActionTypes.AXIS_Y_CHANGE,
+        player: gamePadToPlayerMap[ev.detail.controllerIndex],
+        axisForce: -Math.round(ev.detail.rounded * 0.01)
+      });
+    });
+  });
+
   const renderLoop = () => {
     const { pieuwerStates, bulletStates, enemyStates, explosionStates, collisionStates } = store.getState();
 
@@ -134,7 +142,7 @@ const game = () => {
      }
   };
 
-  let spawns = level1(spawnEnemy);
+  let spawns = level(spawnEnemy);
 
   let uploopinterval : number, bulletInterval : number;
   const updateLoop = () => {
@@ -160,24 +168,23 @@ const game = () => {
     gameState.enemyStates.enemies.forEach(spawnBullet);
 
     if (gameState.pieuwerStates.pieuwerOne.health < 0 || gameState.pieuwerStates.pieuwerTwo.health < 0) {
-      mainLayer.style.opacity = "0";
       gameOver = true;
       clearInterval(uploopinterval);
       clearInterval(bulletInterval);
-      document.body.innerHTML = `<div style="color: white; text-align: center">BOEM! GAME OVER</div>`;
-      setTimeout(() => location.reload(), 3000);
+      eventListeners.clear();
+      //document.body.innerHTML = `<div style="color: white; text-align: center">BOEM! GAME OVER</div>`;
+      setTimeout(() => pickLevel(), 3000);
     }
     if (gameState.enemyStates.enemies.length === 0) {
       if (spawns.length > 0) {
         store.dispatch({type: ActionTypes.RESET_ENEMY_CENTRAL});
         spawns.shift()();
       } else {
-        mainLayer.style.opacity = "0";
         gameOver = true;
         clearInterval(uploopinterval);
         clearInterval(bulletInterval);
-        document.body.innerHTML = `<div style="color: white; font-size: 5em; text-align: center">jA!</div>`;
-        setTimeout(() => location.reload(), 3000);
+        //document.body.innerHTML = `<div style="color: white; font-size: 5em; text-align: center">jA!</div>`;
+        setTimeout(() => pickLevel(), 3000);
       }
     }
   }
@@ -192,4 +199,18 @@ const game = () => {
   renderLoop();
 };
 
-preload(() => setTimeout(game, 10));
+function pickLevel() {
+  levelplaat.style.display = "block";
+  eventListeners.clear();
+
+  levelplaat.style.top = -(levelplaat.clientHeight - window.innerHeight) + "px";
+  const start = (ev: CustomEvent) => {
+    eventListeners.clear();
+    levelplaat.style.display = "none";
+    game(level1);
+  };
+  eventListeners.add(`gamepad-start-pressed`, (ev: CustomEvent) => start);
+  eventListeners.add(`keydown`, start);
+}
+
+preload(pickLevel);

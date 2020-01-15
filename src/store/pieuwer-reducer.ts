@@ -149,6 +149,8 @@ export default function(state : MultiPieuwerState, action : KeyAction) {
     return initialState;
   }
   switch (action.type) {
+    case ActionTypes.RESET_INITIAL_STATE:
+      return initialState;
     case ActionTypes.AXIS_X_CHANGE:
       return {
           ...state,
